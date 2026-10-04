@@ -1,1297 +1,173 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#050505">
-<meta property="og:type" content="website">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0B0F19">
+<meta name="description" content="量子光境：17座可以点击漫游的作品星系。程序动画、网页与工具，在同一片数字宇宙里相遇。">
 <meta property="og:title" content="量子光境 · 个人数字宇宙">
-<meta property="og:description" content="17 个编目天体，约 12GB 星辰质量的个人作品档案：程序动画、网站服务与工具链。">
-<meta property="og:url" content="https://hujyuany.online/">
-<title>量子光境 · 个人数字宇宙 ｜ DSH 深空观测台</title>
-<meta name="description" content="一座个人数字宇宙观测台：17 个编目天体，约 12 GB 星辰质量，跨越 Remotion 程序动画、网站服务与零散工具。">
-
-<!-- ── 字体：Space Grotesk（标题/数字）+ IBM Plex Mono（仪器读数）。
-     走 jsDelivr 的 @fontsource，比 fonts.googleapis.com 在境内可达性更好；
-     中文交给系统字族（PingFang / 鸿蒙 / Noto CJK / 雅黑），避免拉几 MB 的 CJK 子集。 ── -->
+<meta property="og:description" content="点击一座星系，跃迁到它的作品世界。">
+<title>量子光境 · 个人数字宇宙</title>
+<!-- Tailwind CDN 保留；布局和动效的关键规则全部内联，CDN加载失败也能正常浏览。 -->
+<script async src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/space-grotesk@5/index.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/ibm-plex-mono@5/index.css">
-
-<!-- ── Tailwind CDN（按需求内联，无构建工具）。仅用它的布局/间距/字号工具类；
-     所有氛围（星云、玻璃、辉光、动效）都写在下面的自建 CSS 里，
-     这样即使 CDN 慢一步，页面的视觉身份也不会塌。 ── -->
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        colors: {
-          void:     '#050505',  // 暗物质黑
-          midnight: '#0B0F19',  // 深邃午夜蓝
-          nebula:   '#2B1B4D',  // 星云紫
-          mist:     '#6E5A9E',  // 紫罗兰雾（自定的中间色，避免全页只有三色打转）
-          aurora:   '#4FD1C5',  // 极光青
-          gold:     '#F6E05E',  // 恒星金
-          star:     '#F8F9FA'   // 星光白
-        },
-        fontFamily: {
-          display: ['Space Grotesk', 'PingFang SC', 'HarmonyOS Sans SC', 'Noto Sans CJK SC', 'Microsoft YaHei', 'system-ui', 'sans-serif'],
-          mono:    ['IBM Plex Mono', 'SFMono-Regular', 'Menlo', 'Consolas', 'monospace'],
-          sans:    ['Space Grotesk', 'PingFang SC', 'HarmonyOS Sans SC', 'Noto Sans CJK SC', 'Microsoft YaHei', 'system-ui', 'sans-serif']
-        }
-      }
-    }
-  }
-</script>
-
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/space-grotesk@5/latin-400.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/space-grotesk@5/latin-500.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/ibm-plex-mono@5/latin-400.css">
 <style>
-  /* ═══════════════════════════════════════════════════════════
-     0. 设计令牌
-     ═══════════════════════════════════════════════════════════ */
-  :root{
-    --void:#050505; --midnight:#0B0F19; --nebula:#2B1B4D; --mist:#6E5A9E;
-    --aurora:#4FD1C5; --gold:#F6E05E; --star:#F8F9FA;
-    --hair: rgba(248,249,250,.10);          /* 极细发光边框 */
-    --hair-strong: rgba(248,249,250,.20);
-    --glass-top: rgba(43,27,77,.34);
-    --glass-mid: rgba(11,15,25,.62);
-    --glass-bot: rgba(5,5,5,.74);
-    --ease: cubic-bezier(.2,.7,.2,1);
-  }
-
-  *{ box-sizing:border-box; }
-  html{ scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
-  body{
-    margin:0; background:var(--void); color:var(--star);
-    font-family:'Space Grotesk','PingFang SC','HarmonyOS Sans SC','Noto Sans CJK SC','Microsoft YaHei',system-ui,sans-serif;
-    overflow-x:hidden;
-    -webkit-font-smoothing:antialiased;
-    -webkit-tap-highlight-color:rgba(79,209,197,.14);
-  }
-  ::selection{ background:rgba(79,209,197,.30); color:#fff; }
-
-  /* 键盘可达性：极光青焦点环 */
-  :focus-visible{ outline:1px solid var(--aurora); outline-offset:3px; border-radius:4px; }
-
-  .mono{ font-family:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
-  .display{ font-weight:600; letter-spacing:-.01em; }
-  /* 中文标题要"开阔"：拉丁收紧、CJK 放宽字距 */
-  .cjk-wide{ letter-spacing:.10em; }
-  .label{ font-size:10px; letter-spacing:.24em; text-transform:uppercase; }
-
-  /* ═══════════════════════════════════════════════════════════
-     1. 星云层：纯 CSS 径向渐变 + transform 动画
-        （不用 filter:blur —— 径向渐变本身就是柔的，blur巨型元素在手机上很贵）
-     ═══════════════════════════════════════════════════════════ */
-  #nebula{ position:fixed; inset:-25%; z-index:0; pointer-events:none; overflow:hidden; }
-  #nebula i{
-    position:absolute; display:block; border-radius:50%;
-    will-change:transform; transform-origin:50% 50%;
-  }
-  #nebula i:nth-child(1){
-    width:78vw; height:78vw; left:4%; top:2%;
-    background:radial-gradient(circle at 50% 50%, rgba(43,27,77,.60), rgba(43,27,77,.16) 45%, transparent 68%);
-    animation:drift1 96s linear infinite;
-  }
-  #nebula i:nth-child(2){
-    width:62vw; height:62vw; right:2%; top:24%;
-    background:radial-gradient(circle at 50% 50%, rgba(110,90,158,.34), rgba(110,90,158,.10) 42%, transparent 66%);
-    animation:drift2 132s linear infinite;
-  }
-  #nebula i:nth-child(3){
-    width:54vw; height:54vw; left:26%; bottom:2%;
-    background:radial-gradient(circle at 50% 50%, rgba(79,209,197,.10), rgba(79,209,197,.03) 40%, transparent 64%);
-    animation:drift1 168s linear infinite reverse;
-  }
-  @keyframes drift1{ from{transform:rotate(0deg) translate3d(0,0,0)} to{transform:rotate(360deg) translate3d(0,0,0)} }
-  @keyframes drift2{ from{transform:rotate(360deg) scale(1.06)} to{transform:rotate(0deg) scale(1.06)} }
-
-  /* 边缘暗角：把注意力收回中心 */
-  #vignette{
-    position:fixed; inset:0; z-index:1; pointer-events:none;
-    background:
-      radial-gradient(120% 80% at 50% 0%, rgba(11,15,25,.0), rgba(5,5,5,.55) 70%, rgba(5,5,5,.92) 100%),
-      linear-gradient(180deg, rgba(5,5,5,.55), transparent 22%, transparent 76%, rgba(5,5,5,.75));
-  }
-
-  #sky{ position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; }
-
-  /* 内容层永远在星云之上 */
-  .layer{ position:relative; z-index:10; }
-
-  /* ═══════════════════════════════════════════════════════════
-     2. 玻璃拟态
-     ═══════════════════════════════════════════════════════════ */
-  .glass{
-    background:linear-gradient(160deg, var(--glass-top) 0%, var(--glass-mid) 46%, var(--glass-bot) 100%);
-    backdrop-filter:blur(14px) saturate(135%);
-    -webkit-backdrop-filter:blur(14px) saturate(135%);
-    border:1px solid var(--hair);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 28px 70px -40px rgba(0,0,0,.95);
-  }
-
-  /* ═══════════════════════════════════════════════════════════
-     3. 星表卡片
-     ═══════════════════════════════════════════════════════════ */
-  .card{
-    position:relative; border-radius:18px; overflow:hidden;
-    opacity:0; transform:translateY(-12px) scale(.985);   /* 陨石降落：停在略高处，再轻轻沉入 */
-    transition:opacity .8s var(--ease), transform .9s var(--ease), box-shadow .6s var(--ease);
-    will-change:opacity, transform;
-  }
-  .card.in-view{ opacity:1; transform:none; }
-  .card:hover{ box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 40px 90px -44px rgba(0,0,0,1), 0 0 60px -30px rgba(79,209,197,.5); }
-
-  /* 星轨纹理边框：1px 渐变描边，用 mask 镂空 */
-  .card::before{
-    content:''; position:absolute; inset:0; border-radius:inherit; padding:1px; pointer-events:none;
-    background:linear-gradient(135deg, rgba(79,209,197,.42), rgba(248,249,250,.05) 38%, rgba(110,90,158,.34) 78%, rgba(79,209,197,.22));
-    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite:xor; mask-composite:exclude;
-    opacity:.45; transition:opacity .6s var(--ease);
-  }
-  .card:hover::before{ opacity:1; }
-
-  /* 恒星呼吸：悬停时星尘聚拢的光晕 */
-  .card .halo{
-    position:absolute; inset:-30%; pointer-events:none; opacity:0;
-    background:
-      radial-gradient(38% 34% at 22% 16%, rgba(79,209,197,.22), transparent 68%),
-      radial-gradient(34% 30% at 78% 28%, rgba(110,90,158,.30), transparent 70%),
-      radial-gradient(52% 46% at 50% 104%, rgba(43,27,77,.62), transparent 72%);
-    transition:opacity .7s var(--ease);
-  }
-  .card:hover .halo{ opacity:1; animation:breathe 5.2s ease-in-out infinite; }
-  @keyframes breathe{ 0%,100%{ transform:scale(1); opacity:.62 } 50%{ transform:scale(1.045); opacity:1 } }
-
-  /* 大型天体：多层径向渐变星云常亮 */
-  .card.is-featured .halo{ opacity:1; }
-  .card.is-featured .core{
-    position:absolute; inset:0; pointer-events:none;
-    background:
-      radial-gradient(58% 48% at 14% 8%,  rgba(79,209,197,.15), transparent 70%),
-      radial-gradient(48% 58% at 86% 20%, rgba(110,90,158,.26), transparent 72%),
-      radial-gradient(76% 64% at 46% 112%, rgba(43,27,77,.55), transparent 70%);
-  }
-
-  /* 状态灯 */
-  .dot{ width:6px; height:6px; border-radius:50%; display:inline-block; }
-  .dot.dwarf{ background:var(--star); box-shadow:0 0 10px rgba(248,249,250,.9); }
-  .dot.giant{ background:var(--gold); box-shadow:0 0 12px rgba(246,224,94,.9); animation:pulse 3.4s ease-in-out infinite; }
-  .dot.dark { background:var(--mist); box-shadow:0 0 8px rgba(110,90,158,.8); }
-  @keyframes pulse{ 0%,100%{ opacity:1; transform:scale(1) } 50%{ opacity:.55; transform:scale(.82) } }
-
-  /* 吸顶筛选条的玻璃底：显式带 -webkit- 前缀（iOS Safari 必须） */
-  .glassbar{
-    background:rgba(5,5,5,.72);
-    -webkit-backdrop-filter:blur(18px) saturate(140%);
-    backdrop-filter:blur(18px) saturate(140%);
-  }
-
-  /* ═══════════════════════════════════════════════════════════
-     4. 按钮：星际飞船掠过般的白色光斑 / 极光青裂纹
-     ═══════════════════════════════════════════════════════════ */
-  .btn{
-    position:relative; overflow:hidden; display:inline-flex; align-items:center; gap:.5rem;
-    border-radius:999px; padding:.5rem .95rem; font-size:11px; letter-spacing:.16em; text-transform:uppercase;
-    border:1px solid var(--hair); color:rgba(248,249,250,.82);
-    background:linear-gradient(150deg, rgba(43,27,77,.30), rgba(5,5,5,.42));
-    transition:border-color .45s var(--ease), color .45s var(--ease), transform .45s var(--ease), box-shadow .45s var(--ease);
-    cursor:pointer; font-family:'IBM Plex Mono',monospace; white-space:nowrap;
-  }
-  .btn > .sheen{
-    position:absolute; inset:0; pointer-events:none;
-    background:linear-gradient(100deg, transparent 34%, rgba(248,249,250,.26) 50%, transparent 66%);
-    transform:translateX(-130%); transition:transform .9s var(--ease);
-  }
-  .btn:hover{ color:#fff; transform:translateY(-1px); border-color:rgba(79,209,197,.55); box-shadow:0 0 26px -10px rgba(79,209,197,.75); }
-  .btn:hover > .sheen{ transform:translateX(130%); }
-  .btn.primary{ border-color:rgba(79,209,197,.38); color:#EAFBF8; }
-  .btn.gold:hover{ border-color:rgba(246,224,94,.6); box-shadow:0 0 26px -10px rgba(246,224,94,.8); }
-
-  /* 主 CTA：边缘柔和星芒 */
-  .cta{
-    position:relative; display:inline-flex; align-items:center; gap:.75rem;
-    padding:1rem 1.9rem; border-radius:999px; overflow:hidden;
-    font-size:12px; letter-spacing:.22em; text-transform:uppercase; font-family:'IBM Plex Mono',monospace;
-    color:#04120F; background:linear-gradient(120deg, #7DE7DA, var(--aurora) 42%, #35B7A9);
-    border:1px solid rgba(248,249,250,.28); cursor:pointer;
-    box-shadow:0 0 0 1px rgba(79,209,197,.28), 0 0 44px -14px rgba(79,209,197,.85), 0 18px 50px -30px rgba(0,0,0,1);
-    transition:transform .5s var(--ease), box-shadow .5s var(--ease), filter .5s var(--ease);
-  }
-  .cta:hover{ transform:translateY(-2px); box-shadow:0 0 0 1px rgba(79,209,197,.5), 0 0 78px -10px rgba(79,209,197,.95), 0 24px 60px -30px rgba(0,0,0,1); }
-  .cta::after{   /* 星芒：缓慢旋转的锥形光晕 */
-    content:''; position:absolute; inset:-140%; pointer-events:none; opacity:.4;
-    background:conic-gradient(from 0deg, transparent 0 12%, rgba(255,255,255,.75) 14%, transparent 16% 46%, rgba(255,255,255,.5) 48%, transparent 50% 82%, rgba(255,255,255,.6) 84%, transparent 86%);
-    animation:spin 14s linear infinite;
-  }
-  @keyframes spin{ to{ transform:rotate(360deg) } }
-  .cta > span{ position:relative; z-index:1; }
-
-  .link-quiet{
-    font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.18em; text-transform:uppercase;
-    color:rgba(248,249,250,.5); border-bottom:1px solid rgba(248,249,250,.16); padding-bottom:2px;
-    transition:color .4s var(--ease), border-color .4s var(--ease);
-  }
-  .link-quiet:hover{ color:var(--aurora); border-color:rgba(79,209,197,.6); }
-
-  /* ═══════════════════════════════════════════════════════════
-     5. 数据星盘：仪表读数
-     ═══════════════════════════════════════════════════════════ */
-  .stat{ position:relative; padding:1.5rem 1.35rem; }
-  .stat + .stat::before{
-    content:''; position:absolute; left:0; top:1.4rem; bottom:1.4rem; width:1px;
-    background:linear-gradient(180deg, transparent, var(--hair-strong), transparent);
-  }
-  .stat-num{ font-weight:500; font-variant-numeric:tabular-nums; line-height:1; letter-spacing:-.02em; }
-  .ruler{
-    display:block; height:7px; margin-top:.85rem; border-radius:1px; opacity:.5;
-    background-image:repeating-linear-gradient(90deg, rgba(248,249,250,.36) 0 1px, transparent 1px 7px);
-    -webkit-mask-image:linear-gradient(90deg, #000, transparent);
-    mask-image:linear-gradient(90deg, #000, transparent);
-  }
-
-  /* ═══════════════════════════════════════════════════════════
-     6. 质量谱（Hero 底部）：对数刻度光谱带
-     ═══════════════════════════════════════════════════════════ */
-  #massStrip{ display:flex; align-items:flex-end; gap:3px; height:34px; }
-  .mass-seg{
-    position:relative; height:2px; min-width:5px; border-radius:2px; padding:0; border:0; cursor:pointer;
-    background:linear-gradient(90deg, rgba(248,249,250,.30), rgba(110,90,158,.55));
-    transition:height .4s var(--ease), box-shadow .4s var(--ease), background .4s var(--ease);
-  }
-  .mass-seg.bright{ background:linear-gradient(90deg, rgba(79,209,197,.7), rgba(246,224,94,.85)); }
-  .mass-seg:hover, .mass-seg:focus-visible{
-    height:14px; box-shadow:0 0 22px -2px rgba(246,224,94,.85);
-    background:linear-gradient(90deg, rgba(79,209,197,.95), rgba(246,224,94,1));
-  }
-
-  /* ═══════════════════════════════════════════════════════════
-     7. 星图导航仪（筛选条）：选中如恒星被点燃 + 引力透镜
-     ═══════════════════════════════════════════════════════════ */
-  .filter-btn{
-    position:relative; padding:.6rem 1.05rem; border-radius:999px;
-    font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.16em; text-transform:uppercase;
-    color:rgba(248,249,250,.42); background:transparent; border:1px solid transparent; cursor:pointer;
-    transition:color .5s var(--ease), border-color .5s var(--ease), background .5s var(--ease), transform .5s var(--ease), box-shadow .5s var(--ease);
-    white-space:nowrap;
-  }
-  .filter-btn:hover{ color:rgba(79,209,197,.95); border-color:rgba(79,209,197,.28); background:rgba(79,209,197,.05); }
-  .filter-btn .count{ opacity:.55; margin-left:.45rem; }
-  .filter-btn.is-active{
-    color:#1A1405; background:linear-gradient(120deg, #FFF3B8, var(--gold) 60%, #E3C63F);
-    border-color:rgba(246,224,94,.6); box-shadow:0 0 34px -8px rgba(246,224,94,.85);
-  }
-  .filter-btn.is-active .count{ opacity:.75; }
-  /* 引力透镜：被点燃的邻居被轻微"拉"向恒星 */
-  .filter-btn.is-active + .filter-btn{ transform:translateX(3px); }
-  .filter-btn:has(+ .filter-btn.is-active){ transform:translateX(-3px); }
-
-  /* ═══════════════════════════════════════════════════════════
-     8. 导星准星（本页签名元素）
-     ═══════════════════════════════════════════════════════════ */
-  #reticle{ position:absolute; inset:0; z-index:20; pointer-events:none; opacity:0; transition:opacity .4s var(--ease); }
-  #reticle.on{ opacity:1; }
-  #reticle .v, #reticle .h{ position:absolute; background:linear-gradient(90deg, transparent, rgba(79,209,197,.42) 18%, rgba(79,209,197,.42) 82%, transparent); }
-  #reticle .v{ width:1px; top:0; bottom:0; background:linear-gradient(180deg, transparent, rgba(79,209,197,.42) 18%, rgba(79,209,197,.42) 82%, transparent); }
-  #reticle .h{ height:1px; left:0; right:0; }
-  #reticle .ring{
-    position:absolute; width:54px; height:54px; margin:-27px 0 0 -27px; border-radius:50%;
-    border:1px solid rgba(79,209,197,.5); transition:width .35s var(--ease), height .35s var(--ease), margin .35s var(--ease), border-color .35s var(--ease);
-  }
-  #reticle.lock .ring{ width:96px; height:96px; margin:-48px 0 0 -48px; border-color:rgba(246,224,94,.75); }
-  #reticle .tick{ position:absolute; width:7px; height:7px; border:1px solid rgba(79,209,197,.55); }
-  #reticle.lock .tick{ border-color:rgba(246,224,94,.7); }
-  .readout{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.16em; text-transform:uppercase; }
-  #readout{ transition:border-color .4s var(--ease), box-shadow .4s var(--ease); }
-  #readout.lock{ border-color:rgba(246,224,94,.45); box-shadow:0 0 40px -18px rgba(246,224,94,.9); }
-
-  /* ═══════════════════════════════════════════════════════════
-     9. 星轨条形图 / 编年史
-     ═══════════════════════════════════════════════════════════ */
-  .rail-row{ display:grid; grid-template-columns:26px 1fr; gap:.9rem; align-items:center; padding:.55rem 0; border-bottom:1px solid rgba(248,249,250,.045); transition:background .4s var(--ease); }
-  .rail-row:hover{ background:rgba(79,209,197,.04); }
-  .rail{ position:relative; height:1px; background:rgba(248,249,250,.08); border-radius:1px; }
-  .rail > i{
-    position:absolute; left:0; top:0; height:1px; width:0;
-    background:linear-gradient(90deg, rgba(79,209,197,.85), rgba(246,224,94,.9));
-    transition:width 1.4s var(--ease);
-  }
-  .rail > b{   /* 端点星 */
-    position:absolute; top:-2px; width:5px; height:5px; border-radius:50%;
-    background:var(--star); box-shadow:0 0 10px rgba(246,224,94,.9);
-    left:0; opacity:0; transition:left 1.4s var(--ease), opacity .8s var(--ease) .3s;
-  }
-  .rail-row.in-view .rail > i{ width:var(--w); }
-  .rail-row.in-view .rail > b{ left:var(--w); opacity:1; }
-
-  .chrono{ position:relative; padding-left:1.6rem; }
-  .chrono::before{   /* 星轨主线 */
-    content:''; position:absolute; left:4px; top:.4rem; bottom:.4rem; width:1px;
-    background:linear-gradient(180deg, transparent, rgba(79,209,197,.5) 8%, rgba(110,90,158,.5) 60%, transparent);
-  }
-  .chrono-item{ position:relative; padding:0 0 1.9rem .2rem; }
-  .chrono-item::before{
-    content:''; position:absolute; left:-1.6rem; top:.42rem; width:9px; height:9px; border-radius:50%;
-    background:var(--midnight); border:1px solid rgba(248,249,250,.5); transform:translateX(0);
-  }
-  .chrono-item.milestone::before{ background:var(--gold); border-color:rgba(246,224,94,.8); box-shadow:0 0 16px rgba(246,224,94,.8); }
-  .chrono-item.now::before{ background:var(--aurora); border-color:rgba(79,209,197,.9); box-shadow:0 0 18px rgba(79,209,197,.95); animation:pulse 2.6s ease-in-out infinite; }
-
-  /* 筛选切换：网格整体淡出→重组→逐个淡入 */
-  #grid{ transition:opacity .26s var(--ease), transform .26s var(--ease); }
-  #grid.swapping{ opacity:0; transform:scale(.986) translateY(8px); }
-  .card.is-hidden{ display:none; }
-  .card.pop{ animation:cardIn .62s both var(--ease); animation-delay:var(--d,0ms); }
-  @keyframes cardIn{ from{ opacity:0; transform:translateY(10px) scale(.988) } to{ opacity:1; transform:none } }
-
-  /* 进度星轨 */
-  #progress{
-    position:fixed; top:0; left:0; height:1px; width:100%; z-index:60; transform:scaleX(0); transform-origin:0 50%;
-    background:linear-gradient(90deg, var(--aurora), var(--gold));
-    box-shadow:0 0 12px rgba(79,209,197,.8);
-  }
-
-  /* 线上版里，指向本机工作区的入口降级成静态标签 */
-  .local-tag{
-    display:inline-flex; align-items:center; border-radius:999px; padding:.5rem .9rem;
-    font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.16em; text-transform:uppercase;
-    color:rgba(248,249,250,.45); border:1px dashed rgba(248,249,250,.20);
-  }
-
-  /* 提示条 */
-  #toast{
-    position:fixed; left:50%; bottom:calc(1.5rem + env(safe-area-inset-bottom)); transform:translate(-50%, 14px);
-    z-index:70; opacity:0; pointer-events:none; transition:opacity .4s var(--ease), transform .4s var(--ease);
-    border-radius:999px; padding:.6rem 1.1rem;
-  }
-  #toast.on{ opacity:1; transform:translate(-50%, 0); }
-
-  .fade-up{ opacity:0; transform:translateY(14px); transition:opacity 1s var(--ease), transform 1s var(--ease); }
-  .fade-up.in-view{ opacity:1; transform:none; }
-
-  /* 滚动条 */
-  ::-webkit-scrollbar{ width:9px; height:9px; }
-  ::-webkit-scrollbar-track{ background:#050505; }
-  ::-webkit-scrollbar-thumb{ background:rgba(110,90,158,.45); border-radius:9px; }
-  ::-webkit-scrollbar-thumb:hover{ background:rgba(79,209,197,.5); }
-
-  /* ═══════════════════════════════════════════════════════════
-     10. 降级：尊重系统的"减少动态效果"
-     ═══════════════════════════════════════════════════════════ */
-  @media (prefers-reduced-motion: reduce){
-    html{ scroll-behavior:auto; }
-    *, *::before, *::after{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; }
-    .card, .fade-up{ opacity:1 !important; transform:none !important; }
-    .rail > i{ width:var(--w) !important; }
-    .rail > b{ left:var(--w) !important; opacity:1 !important; }
-  }
-  /* 手机端：降低毛玻璃开销。背景本来就是近黑 + 稀疏星点，
-     模糊半径减半视觉几乎无差，但滚动时的合成成本降一大截。 */
-  @media (max-width: 768px){
-    .glass{
-      -webkit-backdrop-filter:blur(9px) saturate(125%);
-      backdrop-filter:blur(9px) saturate(125%);
-      background:linear-gradient(160deg, rgba(43,27,77,.40) 0%, rgba(11,15,25,.70) 46%, rgba(5,5,5,.84) 100%);
-    }
-  }
-
-  /* 触摸设备：准星与星尘没有意义，关掉省电 */
-  @media (hover:none), (pointer:coarse){
-    #reticle{ display:none; }
-    .card:hover .halo{ animation:none; }
-  }
+/* ── 深空观测台：夜蓝、低饱和星云紫、微弱恒星金，而不是霓虹终端 ── */
+:root{color-scheme:dark;--ink:#0B0F19;--black:#050505;--purple:#2B1B4D;--white:#F8F9FA;--teal:#4FD1C5;--gold:#F6E05E;--soft:#aeb9cc;--line:rgba(202,219,239,.13);--ease:cubic-bezier(.16,1,.3,1)}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:80px}body{margin:0;color:var(--white);background:var(--ink);font:15px/1.8 "Space Grotesk","PingFang SC","Microsoft YaHei",system-ui,sans-serif;overflow-x:hidden;-webkit-tap-highlight-color:rgba(79,209,197,.15)}button,a,input{font:inherit}button{color:inherit;cursor:pointer}button:disabled{cursor:default;opacity:.35}a{color:inherit;text-decoration:none}button{border:0}h1,h2,h3,p{margin:0}::selection{background:#4fd1c544}button:focus-visible,a:focus-visible{outline:2px solid var(--teal);outline-offset:5px}button:focus:not(:focus-visible){outline:0}.mono,.eyebrow{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.17em}.eyebrow{color:var(--teal);text-transform:uppercase}.wrap{width:min(1240px,calc(100% - 72px));margin:auto}.muted{color:var(--soft)}.hide{display:none!important}
+#sky{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}.nebula{position:fixed;inset:-15%;pointer-events:none;z-index:0;background:radial-gradient(ellipse at 66% 28%,#39296366,transparent 45%),radial-gradient(ellipse at 12% 70%,#2b1b4d88,transparent 45%),radial-gradient(ellipse at 85% 80%,#236e7333,transparent 36%);transform:rotate(-8deg);animation:nebulaDrift 36s ease-in-out infinite alternate}.nebula.b{background:radial-gradient(ellipse at 70% 22%,#49657422,transparent 35%);animation-duration:51s;animation-direction:alternate-reverse}.vignette{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 54% 46%,transparent 20%,#05050588 100%);z-index:0}@keyframes nebulaDrift{to{transform:translate3d(-4%,3%,0) rotate(9deg) scale(1.07)}}
+main,footer,.topbar{position:relative;z-index:1}.topbar{height:92px;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{display:flex;align-items:center;gap:12px;font-size:13px;letter-spacing:.18em}.brand-mark{width:29px;height:29px;border:1px solid #4fd1c566;border-radius:50%;display:grid;place-items:center;position:relative}.brand-mark:before{content:"";width:5px;height:5px;border-radius:50%;background:#b8eee8;box-shadow:0 0 17px #4fd1c5}.brand-mark:after{content:"";position:absolute;inset:8px -5px;border:1px solid #4fd1c544;border-radius:50%;transform:rotate(-33deg)}.toplinks{display:flex;gap:28px;color:#b9c4d7;font-size:11px}.toplinks a:hover{color:var(--teal)}
+.hero{position:relative;padding-top:36px}.hero-copy{position:absolute;top:24px;left:0;pointer-events:none;z-index:2}.hero-copy h1{font-size:clamp(34px,4.4vw,62px);font-weight:500;letter-spacing:.16em;line-height:1.35;margin-top:14px}.hero-copy p{margin-top:13px;color:#b5c0d1;font-size:13px;letter-spacing:.06em}.hero-copy .small{margin-top:8px;font-size:11px;color:#8292ad}.hero-index{position:absolute;right:0;top:35px;text-align:right;color:#aebad0;z-index:2}.hero-index strong{font-size:30px;font-weight:400;color:#f0e9ce;display:block}.hero-index .mono{line-height:1.9}
+.scene-shell{position:relative;height:min(800px,calc(100svh - 110px));min-height:660px;border-bottom:1px solid var(--line);isolation:isolate}.scene-shell:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 56% 49%,#796fb812,transparent 52%)}#universe{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.galaxy-layer{position:absolute;inset:0;overflow:hidden;transition:opacity .35s,transform .35s}.galaxy-layer.changing{opacity:0;transform:scale(.98)}
+/* DOM 按钮与 Canvas 星系共用同一个位置函数，视觉中心就是触摸中心，不用猜坐标。 */
+.galaxy-hit{position:absolute;top:0;left:0;width:164px;min-height:108px;padding:12px 4px 8px;background:transparent;transform:translate3d(-9999px,0,0);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;text-align:center;touch-action:manipulation;z-index:2}.galaxy-hit:before{content:"";position:absolute;width:76px;height:76px;left:50%;top:7px;transform:translateX(-50%) rotate(-22deg);border:1px solid #d8e8ff00;border-radius:50%;transition:border .4s,box-shadow .4s,width .4s}.galaxy-hit:hover:before,.galaxy-hit:focus-visible:before{border-color:#4fd1c566;box-shadow:0 0 45px #4fd1c517}.galaxy-hit.active:before{border-color:#f6e05e88;box-shadow:0 0 50px #f6e05e17}.galaxy-label{margin-top:65px;max-width:200px;color:#e8edf5;font-size:12px;text-shadow:0 2px 12px #000,0 0 18px #050505;line-height:1.5;transition:color .3s}.galaxy-hit.featured{width:220px;min-height:150px}.galaxy-hit.featured .galaxy-label{font-size:17px;margin-top:98px;letter-spacing:.025em}.galaxy-hit.featured:before{width:110px;height:90px;top:20px}.galaxy-sub{color:#a5afc7;font:9px/1.8 "IBM Plex Mono",monospace;letter-spacing:.08em;text-shadow:0 2px 10px #000}.galaxy-hit:hover .galaxy-label,.galaxy-hit:focus-visible .galaxy-label{color:#d8f7f1}.jump-hint{font-size:9px;letter-spacing:.18em;color:#b5dacf;opacity:0;transition:opacity .3s}.galaxy-hit:hover .jump-hint,.galaxy-hit:focus-visible .jump-hint{opacity:1}
+.scene-bottom{position:absolute;left:0;right:0;bottom:19px;display:flex;align-items:center;justify-content:space-between;gap:20px;z-index:3}.scene-note{font-size:11px;color:#acb8cc;display:flex;align-items:center;gap:8px}.live-dot{width:5px;height:5px;border-radius:50%;background:#81cfc0;box-shadow:0 0 12px #4fd1c5;animation:breathe 3s ease-in-out infinite}.scene-controls{display:flex;gap:8px;align-items:center}.quiet-btn{background:#0b101e99;border:1px solid var(--line);padding:8px 13px;border-radius:20px;font-size:10px;color:#bbc8da;white-space:nowrap}.quiet-btn:hover{border-color:#4fd1c577;color:#d8f5ee}#pageReadout{color:#a9b6cc;min-width:48px;text-align:center}#motionToggle[aria-pressed="true"]{color:#a5dbd1}
+.navigation{position:sticky;top:0;z-index:4;padding:15px 0;background:#0b0f19d9;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:20px}.filters{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none}.filter{padding:9px 17px;background:transparent;border:1px solid transparent;border-radius:24px;color:#aebad0;font:10px/1.8 "IBM Plex Mono",monospace;white-space:nowrap;letter-spacing:.12em;transition:color .35s,background .35s,box-shadow .35s}.filter:hover{color:var(--teal);border-color:#4fd1c533}.filter[aria-pressed="true"]{color:#f8edbc;background:#c6a75a12;border-color:#f6e05e44;box-shadow:0 0 24px #f6e05e0a}.filter b{font-weight:400;opacity:.65;margin-left:5px}.view-link{font:10px "IBM Plex Mono",monospace;color:#9cafc2;white-space:nowrap;letter-spacing:.12em}.view-link:hover{color:var(--teal)}
+section.archive{padding:72px 0 62px}.section-head{display:flex;align-items:end;justify-content:space-between;margin-bottom:25px;gap:20px}.section-head h2{font-size:28px;font-weight:400;letter-spacing:.12em;margin-top:9px}.section-head p{font-size:12px;color:#a3b3c9;max-width:38ch}.glass{background:linear-gradient(135deg,#2930493a,#0b101acb);border:1px solid var(--line);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:inset 0 1px #ffffff04}.project-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.card{position:relative;border-radius:19px;overflow:hidden;transition:transform .5s var(--ease),border-color .5s,box-shadow .5s;animation:cardArrive .7s var(--ease) backwards;animation-delay:var(--delay,0s)}.card:hover{transform:translateY(-6px);border-color:#4fd1c547;box-shadow:0 25px 60px #0005,0 0 40px #4fd1c509}.card.featured{grid-column:span 2;grid-row:span 2;min-height:390px;background:radial-gradient(ellipse at 90% 10%,#63539244,transparent 52%),radial-gradient(ellipse at 10% 90%,#38797722,transparent 55%),#101522b0}.card-trigger{display:flex;flex-direction:column;align-items:flex-start;text-align:left;width:100%;height:100%;min-height:229px;padding:25px;background:transparent}.card.featured .card-trigger{padding:32px;min-height:390px}.card .number{display:flex;align-items:center;gap:9px;color:#a3b5c8;font-size:9px;letter-spacing:.1em}.status{width:5px;height:5px;border-radius:50%;background:#a6d3c7;display:inline-block}.status.giant{background:#e9cc78}.status.dark{background:#9182b2}.card h3{font-size:19px;font-weight:500;margin-top:17px}.card.featured h3{font-size:28px;margin-top:25px}.card p{font-size:12px;line-height:1.9;color:#aebbd0;margin-top:10px;max-width:54ch}.card-bottom{margin-top:auto;padding-top:22px;display:flex;width:100%;align-items:center;justify-content:space-between;color:#a2b4c6;font-size:10px}.card-arrow{border:1px solid #cadbe31c;border-radius:50%;height:29px;width:29px;display:grid;place-items:center;color:#acd7d0;transition:transform .4s}.card:hover .card-arrow{transform:rotate(-35deg)}.cover-small{width:100%;aspect-ratio:16/7;object-fit:cover;border-radius:10px;margin-top:23px;border:1px solid #ffffff15}.card .open-label{color:#b8dacf;letter-spacing:.13em}.archive-notice{margin-top:22px;font-size:11px;color:#96a7c1}.card-reveal{opacity:0;transform:translateY(16px)}.card-reveal.revealed{opacity:1;transform:none;transition:opacity .65s,transform .75s var(--ease)}@keyframes cardArrive{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);border-radius:16px;padding:24px 5px;margin:18px 0 70px}.stat{padding:6px 24px}.stat+.stat{border-left:1px solid var(--line)}.stat strong{display:block;font-size:34px;font-weight:400;line-height:1.4;letter-spacing:-.02em}.stat span{font-size:10px;color:#a9b7cb;letter-spacing:.1em}.stat small{display:block;font-size:10px;color:#90a1ba}.history{display:grid;grid-template-columns:1.1fr 1fr;gap:70px;margin-bottom:80px}.history h2{font-size:25px;font-weight:400;letter-spacing:.12em;margin-bottom:28px}.timeline{position:relative;padding-left:24px;border-left:1px solid #6ea1a833}.timeline-item{position:relative;margin:0 0 23px}.timeline-item:before{content:"";position:absolute;left:-28px;top:8px;width:7px;height:7px;border:1px solid #95c8ca;border-radius:50%;background:var(--ink)}.timeline-item .mono{color:#a7c5d0}.timeline-item h3{font-size:13px;font-weight:400;margin-top:3px}.timeline-item p{color:#95a6bf;font-size:11px}.rank{display:grid;grid-template-columns:1fr 50% 65px;gap:14px;align-items:center;margin:16px 0;font-size:12px}.rank-name{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:#b9c6d9}.rail{height:1px;background:#c4d5e51a;position:relative}.rail i{display:block;width:var(--size);height:1px;background:linear-gradient(90deg,#4fd1c5bb,#f6e05e99);position:relative}.rail i:after{content:"";width:4px;height:4px;border-radius:50%;background:#f1e6b6;position:absolute;right:0;top:-1.5px;box-shadow:0 0 10px #eedb88}.rank .mono{text-align:right;font-size:9px;color:#b0bbce}footer{border-top:1px solid var(--line);padding:35px 0 45px;color:#9daec4}.footer-row{display:flex;justify-content:space-between;gap:22px}.footer-row p{font-size:11px}.footer-row a{color:#aed5ce;font-size:12px}.footer-row .mono{font-size:9px}
+/* 跃迁动作：准备 0–100ms → 推近 100–330ms → 详情减速落定 330–600ms。 */
+#warp{position:fixed;inset:0;z-index:10;pointer-events:none;opacity:0;background:radial-gradient(circle at var(--x,50%) var(--y,50%),#e9e9df00 0%,#9588be16 15%,#0b0f19b8 62%)}#warp.flying{animation:warpFlash .6s ease-in-out}.scene-shell.flying #universe{transform-origin:var(--origin);animation:cameraFlight .5s cubic-bezier(.3,0,.2,1)}@keyframes cameraFlight{0%{transform:scale(1)}20%{transform:scale(.985)}100%{transform:scale(1.55);opacity:.25}}@keyframes warpFlash{0%{opacity:0}22%{opacity:.25}60%{opacity:1}100%{opacity:0}}
+#projectView{width:min(1120px,calc(100% - 56px));max-height:calc(100svh - 50px);padding:0;background:#0b101cfa;color:var(--white);border:1px solid #a5c2d42b;border-radius:22px;box-shadow:0 50px 140px #000a;overflow:auto;overscroll-behavior:contain;z-index:11}#projectView::backdrop{background:#05070be6;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}.detail-shell{padding:34px 45px 40px;animation:detailArrive .6s var(--ease)}@keyframes detailArrive{from{opacity:0;transform:translateY(18px) scale(.985)}to{opacity:1;transform:none}}.detail-top{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:25px}.back{display:flex;align-items:center;gap:9px;color:#bad7d2;background:transparent;font-size:12px;padding:6px 0}.detail-title{font-size:clamp(23px,3vw,37px);font-weight:400;line-height:1.35;letter-spacing:.04em;margin:13px 0 8px}.detail-latin{color:#8fa1b9;font-size:10px;letter-spacing:.13em}.detail-desc{color:#bcc8da;font-size:13px;line-height:1.95;max-width:75ch;margin-top:18px}.detail-info{display:flex;flex-wrap:wrap;gap:20px;padding:18px 0 19px;color:#aebed0;font-size:11px}.detail-info span+span{border-left:1px solid var(--line);padding-left:20px}.media-box{position:relative;border-radius:14px;overflow:hidden;background:#06080e;border:1px solid var(--line);margin-top:15px;aspect-ratio:16/9;display:grid;place-items:center}.media-box video,.media-box iframe{width:100%;height:100%;display:block;border:0;object-fit:contain}.media-box iframe{background:#000}.media-placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;background:radial-gradient(ellipse,#352b552b,transparent)}.media-placeholder img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.52}.media-placeholder>*:not(img){position:relative}.play{background:#e6f6f0;color:#0b211c;border-radius:25px;padding:11px 26px;font-size:12px;box-shadow:0 0 60px #a6e4d316;transition:transform .3s}.play:hover{transform:scale(1.035)}.media-status{font-size:11px;color:#b4c7d9;margin-top:10px;min-height:20px}.detail-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:23px}.action{background:#142a2d77;border:1px solid #5caaa644;color:#c2e5dd;padding:9px 18px;border-radius:25px;font-size:11px;transition:background .3s}.action:hover{background:#23403d;color:white}.action.secondary{background:transparent;border-color:var(--line);color:#b3c2d6}.notice{border:1px solid var(--line);border-radius:13px;margin-top:20px;padding:18px;color:#aebfd6;font-size:12px;background:#22263a33}.notice strong{color:#d3e0ec;font-weight:400;display:block;font-size:13px;margin-bottom:5px}.project-nav{display:flex;justify-content:space-between;gap:15px;border-top:1px solid var(--line);margin-top:27px;padding-top:20px}.project-nav button{background:transparent;color:#9eafc6;font-size:11px;padding:7px 0}.project-nav button:hover{color:var(--teal)}#toast{position:fixed;bottom:28px;left:50%;transform:translate(-50%,15px);border:1px solid var(--line);border-radius:23px;background:#101a25f0;color:#d0e2dc;padding:10px 20px;font-size:12px;z-index:15;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s}#toast.on{opacity:1;transform:translate(-50%,0)}
+body.motion-off .nebula,body.motion-off .live-dot{animation-play-state:paused}body.motion-off .card,body.motion-off .detail-shell,body.motion-off #warp{animation:none}body.motion-off .scene-shell.flying #universe{animation:none}
+@media(max-width:1000px){.wrap{width:calc(100% - 48px)}.project-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.card.featured{grid-column:span 2;grid-row:span 1}.card.featured .card-trigger{min-height:340px}.history{gap:35px}.hero-copy h1{font-size:44px}.hero-copy p{font-size:12px}}
+@media(max-width:600px){.wrap{width:calc(100% - 36px)}.topbar{height:74px}.brand{font-size:11px}.toplinks{gap:17px;font-size:10px}.toplinks .extra{display:none}.hero{padding-top:18px}.hero-copy{top:12px}.hero-copy h1{font-size:34px;margin-top:10px}.hero-copy .eyebrow{font-size:8px;letter-spacing:.1em}.hero-copy p{font-size:11px;margin-top:7px;max-width:28ch}.hero-copy .small{display:none}.hero-index{top:23px}.hero-index strong{font-size:22px}.hero-index .mono{font-size:8px}.scene-shell{height:680px;min-height:680px}.galaxy-hit{width:140px;min-height:88px;padding-bottom:0}.galaxy-label{font-size:11px;margin-top:53px}.galaxy-hit.featured{width:200px;min-height:122px}.galaxy-hit.featured .galaxy-label{font-size:14px;margin-top:82px}.galaxy-sub{font-size:8px}.jump-hint{display:none}.scene-bottom{bottom:18px;align-items:start;gap:8px;flex-direction:column}.scene-controls{width:100%;justify-content:space-between}.scene-note{font-size:10px}.quiet-btn{padding:6px 11px;font-size:9px}.navigation{padding:11px 0;gap:8px}.filter{padding:8px 10px;font-size:9px;letter-spacing:.02em}.view-link{display:none}.archive{padding-top:48px!important}.section-head h2{font-size:23px}.section-head p{display:none}.project-grid{grid-template-columns:1fr;gap:13px}.card.featured{grid-column:auto;grid-row:auto}.card.featured .card-trigger{padding:24px;min-height:330px}.card-trigger{padding:23px;min-height:215px}.card h3{font-size:18px}.card.featured h3{font-size:23px}.stats{grid-template-columns:repeat(2,1fr);gap:24px 0;padding:24px 0;margin-bottom:50px}.stat{padding:0 18px}.stat strong{font-size:28px}.stat:nth-child(3){border-left:0}.history{grid-template-columns:1fr;gap:30px}.footer-row{flex-direction:column;gap:12px}.glass{backdrop-filter:none;-webkit-backdrop-filter:none;background-color:#101726bb}#projectView{width:calc(100% - 18px);max-height:calc(100svh - 24px);border-radius:16px}.detail-shell{padding:20px 19px 24px}.detail-top{padding-bottom:13px;margin-bottom:18px}.detail-info{gap:12px;font-size:10px}.detail-info span+span{padding-left:12px}.detail-desc{font-size:12px}.project-nav{font-size:10px}.media-box{border-radius:9px}.detail-title{font-size:24px}.detail-actions{gap:8px}.action{font-size:10px;padding:9px 13px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}body:not(.motion-on) .nebula,body:not(.motion-on) .live-dot{animation:none}body:not(.motion-on) .card,body:not(.motion-on) .detail-shell{animation:none}body:not(.motion-on) .card-reveal{opacity:1;transform:none}}
 </style>
 </head>
-
-<body class="bg-void text-star">
-
-<!-- 星云 + 星空 + 暗角（三层背景，全部与内容解耦） -->
-<div id="nebula" aria-hidden="true"><i></i><i></i><i></i></div>
-<canvas id="sky" aria-hidden="true"></canvas>
-<div id="vignette" aria-hidden="true"></div>
-<div id="progress" aria-hidden="true"></div>
-
-<!-- ═══════════ 顶栏 ═══════════ -->
-<header class="layer absolute top-0 left-0 right-0 z-40">
-  <div class="mx-auto max-w-[1240px] px-6 sm:px-10 py-6 flex items-center justify-between gap-6">
-    <a href="#top" class="flex items-center gap-3 group">
-      <span class="relative flex h-7 w-7 items-center justify-center">
-        <span class="absolute inset-0 rounded-full border border-aurora/40"></span>
-        <span class="h-1.5 w-1.5 rounded-full bg-aurora shadow-[0_0_14px_rgba(79,209,197,.95)]"></span>
-      </span>
-      <span class="mono text-[10px] tracking-[.28em] text-star/68 group-hover:text-aurora transition-colors">DSH ⁄ 星际实验室</span>
-    </a>
-    <nav class="hidden md:flex items-center gap-8">
-      <a href="#catalog" class="link-quiet">星表 Catalog</a>
-      <a href="#chronicle" class="link-quiet">编年史 Chronicle</a>
-      <a href="https://hujyuany.online" target="_blank" rel="noopener" class="link-quiet" data-online-hide>hujyuany.online ↗</a>
-    </nav>
-    <a href="#catalog" class="md:hidden mono text-[10px] tracking-[.2em] text-star/68">星表 ↓</a>
-  </div>
-</header>
-
-<!-- ═══════════ 1. Hero ═══════════ -->
-<main id="top" class="layer">
-  <section class="relative mx-auto max-w-[1240px] px-6 sm:px-10 pt-32 sm:pt-40 pb-16">
-
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-start">
-
-      <!-- 左：主张 -->
-      <div class="lg:col-span-7 fade-up">
-        <div class="mono label text-aurora/70 flex items-center gap-3">
-          <span class="h-px w-8 bg-aurora/50"></span>
-          DSH ⁄ Deep Space Archive — 2026.08 → 2026.10
-        </div>
-
-        <h1 class="mt-7 text-[2.6rem] sm:text-6xl lg:text-[4.6rem] leading-[1.06] display">
-          <span class="cjk-wide block">量子光境</span>
-          <span class="cjk-wide block bg-gradient-to-r from-star via-star to-mist bg-clip-text text-transparent">个人数字宇宙</span>
-        </h1>
-
-        <p class="mt-6 max-w-[38ch] text-[15px] leading-[1.9] text-star/60">
-          <span data-total>17</span> 个星系 ／ 约 12GB 星辰质量 ／ 跨越视频、网页与工具的数字轨迹。<br class="hidden sm:block">
-          从 2026 年 8 月的第一个脚本，到 8.9GB 的同人 PV —— 全部可追溯、可打开、可验证。
-        </p>
-
-        <div class="mt-9 flex flex-wrap items-center gap-5">
-          <a href="#catalog" class="cta"><span>启动星际漫游 ↗</span></a>
-          <div class="mono text-[10px] leading-relaxed tracking-[.18em] text-star/50">
-            进入展馆 · <span data-total>17</span> 个编目天体<br>
-            <span class="text-star/40">SCROLL TO ENTER THE HALL</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- 右：观测日志（真实的最新状态，不是装饰） -->
-      <aside class="lg:col-span-5 fade-up">
-        <div class="glass rounded-[18px] p-6 sm:p-7">
-          <div class="flex items-center justify-between">
-            <div class="mono label text-star/60">观测日志 ⁄ Observation Log</div>
-            <span class="dot giant"></span>
-          </div>
-          <ul class="mt-5 space-y-4" id="obsLog">
-            <li class="flex gap-4">
-              <span class="mono text-[10px] text-gold/85 pt-[3px] shrink-0">10-04</span>
-              <p class="text-[13px] leading-relaxed text-star/70">world.execute(me); PV 成长重制预览批准，进入完整版 <span class="mono text-[10px] text-gold/60">· 红巨星</span></p>
-            </li>
-            <li class="flex gap-4">
-              <span class="mono text-[10px] text-star/62 pt-[3px] shrink-0">10-03</span>
-              <p class="text-[13px] leading-relaxed text-star/70">个人网站「量子光境」上线 hujyuany.online，线上线下 md5 一致</p>
-            </li>
-            <li class="flex gap-4">
-              <span class="mono text-[10px] text-star/62 pt-[3px] shrink-0">10-02</span>
-              <p class="text-[13px] leading-relaxed text-star/70">《错误中的秩序》180 秒双语数学电影交付，附 15 份核验 JSON</p>
-            </li>
-            <li class="flex gap-4">
-              <span class="mono text-[10px] text-star/62 pt-[3px] shrink-0">10-01</span>
-              <p class="text-[13px] leading-relaxed text-star/70">《熵变》8 镜头 + 90 秒原创程序合成音乐完成</p>
-            </li>
-          </ul>
-          <div class="mt-6 pt-5 border-t border-star/10 flex items-center justify-between">
-            <span class="mono text-[10px] tracking-[.16em] text-star/50">LAST SYNC 2026-10-04</span>
-            <a href="#chronicle" class="link-quiet">编年史 →</a>
-          </div>
-        </div>
-      </aside>
-    </div>
-
-    <!-- 质量谱：真实体量驱动的对数光谱带，可点击跃迁 -->
-    <div class="mt-20 sm:mt-24 fade-up">
-      <div class="flex items-end justify-between gap-6 mb-4">
-        <div class="mono label text-star/50">质量谱 ⁄ Mass Spectrum · 对数刻度</div>
-        <div class="mono text-[10px] tracking-[.16em] text-star/68 text-right" id="massReadout">悬停查看天体 · 点击跃迁</div>
-      </div>
-      <div id="massStrip" role="group" aria-label="编目天体的质量谱，按体积对数排列"></div>
-    </div>
-  </section>
-
-  <!-- ═══════════ 2. 数据星盘 ═══════════ -->
-  <section class="relative mx-auto max-w-[1240px] px-6 sm:px-10">
-    <div class="glass rounded-[18px] grid grid-cols-2 lg:grid-cols-4 fade-up">
-      <div class="stat">
-        <div class="stat-num text-4xl sm:text-5xl"><span data-count="12">0</span><span class="text-lg text-star/60 ml-2 font-mono">GB</span></div>
-        <div class="mono label text-star/60 mt-4">宇宙质量</div>
-        <div class="mono text-[10px] text-star/45 mt-1.5">编目合计 <span data-size>11.3</span> GB + 散落交付</div>
-        <span class="ruler"></span>
-      </div>
-      <div class="stat">
-        <div class="stat-num text-4xl sm:text-5xl"><span data-count="65150">0</span></div>
-        <div class="mono label text-star/60 mt-4">恒星文件</div>
-        <div class="mono text-[10px] text-star/45 mt-1.5">最大星体 · 全库 <span data-files>140,526</span></div>
-        <span class="ruler"></span>
-      </div>
-      <div class="stat">
-        <div class="stat-num text-4xl sm:text-5xl"><span data-count="3">0</span><span class="text-lg text-star/60 ml-2 font-mono">区</span></div>
-        <div class="mono label text-star/60 mt-4">星区分类</div>
-        <div class="mono text-[10px] text-star/45 mt-1.5"><span data-cats>程序动画 9 · 网站 3 · 工具 5</span></div>
-        <span class="ruler"></span>
-      </div>
-      <div class="stat">
-        <div class="stat-num text-4xl sm:text-5xl"><span data-count="1">0</span><span class="text-lg text-star/60 ml-2 font-mono">域</span></div>
-        <div class="mono label text-star/60 mt-4">独立光年域名</div>
-        <div class="mono text-[10px] text-star/45 mt-1.5">hujyuany.online · 境外免备案</div>
-        <span class="ruler"></span>
-      </div>
-    </div>
-  </section>
-
-  <!-- ═══════════ 3. 星图导航仪 ═══════════ -->
-  <div class="sticky top-0 z-40 mt-16 sm:mt-20">
-    <div class="glassbar border-y border-star/10">
-      <div class="mx-auto max-w-[1240px] px-6 sm:px-10 py-3.5 flex items-center gap-4 overflow-x-auto">
-        <span class="mono label text-star/45 hidden sm:block shrink-0 pr-2">星系坐标</span>
-        <div class="flex items-center gap-2" id="filters" role="tablist" aria-label="按星区筛选作品">
-          <button class="filter-btn is-active" data-cat="all"   aria-pressed="true">全部星系 <span class="count" data-count-cat="all">17</span></button>
-          <button class="filter-btn" data-cat="anim"  aria-pressed="false">程序动画 ⁄ ANIM <span class="count" data-count-cat="anim">9</span></button>
-          <button class="filter-btn" data-cat="web"   aria-pressed="false">网站与工具 ⁄ WEB <span class="count" data-count-cat="web">3</span></button>
-          <button class="filter-btn" data-cat="tools" aria-pressed="false">零散工具 ⁄ TOOLS <span class="count" data-count-cat="tools">5</span></button>
-        </div>
-        <span class="mono text-[10px] tracking-[.18em] text-star/40 ml-auto hidden lg:block shrink-0" id="sortNote">排序 · 质量降序</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══════════ 4. 星云档案库 ═══════════ -->
-  <section id="catalog" class="relative mx-auto max-w-[1240px] px-6 sm:px-10 pt-14 pb-8">
-    <!-- 导星准星覆盖层（仅在星表区激活） -->
-    <div id="reticle" aria-hidden="true">
-      <div class="v"></div><div class="h"></div>
-      <div class="ring"></div>
-      <div class="tick" style="left:0;top:0;border-right:0;border-bottom:0"></div>
-      <div class="tick" style="right:0;top:0;border-left:0;border-bottom:0"></div>
-      <div class="tick" style="left:0;bottom:0;border-right:0;border-top:0"></div>
-      <div class="tick" style="right:0;bottom:0;border-left:0;border-top:0"></div>
-    </div>
-
-    <div class="flex items-end justify-between gap-6 mb-8">
-      <div>
-        <div class="mono label text-aurora/70">星云档案库 ⁄ Nebula Archive</div>
-        <h2 class="mt-4 text-3xl sm:text-[2.6rem] display cjk-wide"><span data-total>17</span> 个编目天体</h2>
-      </div>
-      <div class="hidden sm:block text-right">
-        <div class="mono text-[10px] tracking-[.18em] text-star/50 leading-relaxed">
-          白矮星 = 已交付且稳定<br>
-          红巨星 = 仍在膨胀 ／ 暗物质 = 归档休眠
-        </div>
-      </div>
-    </div>
-
-    <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 lg:gap-5"></div>
-
-    <noscript>
-      <div class="glass rounded-[18px] p-6 mt-6 text-star/70 text-sm">
-        星表由原生 JavaScript 渲染。请在浏览器中启用 JavaScript，即可看到全部编目天体。
-      </div>
-    </noscript>
-
-    <!-- 准星读数板 -->
-    <div id="readout" class="glass rounded-full px-5 py-2.5 fixed bottom-5 right-5 z-50 hidden lg:flex items-center gap-4 readout text-star/60">
-      <span class="h-1.5 w-1.5 rounded-full bg-aurora shadow-[0_0_10px_rgba(79,209,197,.9)]"></span>
-      <span id="readoutText">SCANNING</span>
-    </div>
-  </section>
-
-  <!-- ═══════════ 5. 宇宙演化史 + 体积排行 ═══════════ -->
-  <section id="chronicle" class="relative mx-auto max-w-[1240px] px-6 sm:px-10 pt-20 pb-24">
-    <div class="mono label text-aurora/70 mb-8">宇宙演化史 ⁄ Chronicle</div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-10">
-
-      <!-- 星际编年史 -->
-      <div class="lg:col-span-6">
-        <h2 class="text-2xl sm:text-3xl display cjk-wide mb-8">星际编年史</h2>
-        <div class="chrono">
-          <div class="chrono-item now fade-up">
-            <div class="mono text-[10px] tracking-[.2em] text-aurora/80">2026-10-04</div>
-            <h3 class="mt-2 text-star/90 text-[15px]">world.execute(me); PV · 成长重制预览</h3>
-            <p class="mt-1.5 text-[13px] leading-relaxed text-star/62">B 站 BV1xCai6aE9g 与 GitHub 已发布；0–111 秒与 147–162.25 秒预览获批准。</p>
-          </div>
-          <div class="chrono-item fade-up">
-            <div class="mono text-[10px] tracking-[.2em] text-star/62">2026-10-03</div>
-            <h3 class="mt-2 text-star/90 text-[15px]">个人网站「量子光境」上线</h3>
-            <p class="mt-1.5 text-[13px] leading-relaxed text-star/62">单文件 index.html 挂上 hujyuany.online，线上与本地 md5 一致。</p>
-          </div>
-          <div class="chrono-item fade-up">
-            <div class="mono text-[10px] tracking-[.2em] text-star/62">2026-10-02</div>
-            <h3 class="mt-2 text-star/90 text-[15px]">四个交付日</h3>
-            <p class="mt-1.5 text-[13px] leading-relaxed text-star/62">多余之路 · 错误中的秩序 · 未删除的十一秒 · Claude 中转配置，同一天落地。</p>
-          </div>
-          <div class="chrono-item milestone fade-up">
-            <div class="mono text-[10px] tracking-[.2em] text-gold/75">2026-10-01</div>
-            <h3 class="mt-2 text-star/90 text-[15px]">熵变 · 量子</h3>
-            <p class="mt-1.5 text-[13px] leading-relaxed text-star/62">两部 90 秒 / 8 镜头 / 2700 帧的程序动画，附 90 秒原创程序合成音乐。</p>
-          </div>
-          <div class="chrono-item fade-up">
-            <div class="mono text-[10px] tracking-[.2em] text-star/62">2026-09-24 → 09-26</div>
-            <h3 class="mt-2 text-star/90 text-[15px]">试卷详解与中转站保真榜</h3>
-            <p class="mt-1.5 text-[13px] leading-relaxed text-star/62">高三数学物理详解成稿、试卷高清修复、62 KB 保真度榜单、绘梨衣角色卡。</p>
-          </div>
-          <div class="chrono-item fade-up">
-            <div class="mono text-[10px] tracking-[.2em] text-star/50">2026-09-12 → 09-13</div>
-            <h3 class="mt-2 text-star/80 text-[15px]">模型探测链</h3>
-            <p class="mt-1.5 text-[13px] leading-relaxed text-star/60">gpt6-provider、validate-models 等一堆 mjs 脚本，后来被各项目吸收。</p>
-          </div>
-          <div class="chrono-item fade-up">
-            <div class="mono text-[10px] tracking-[.2em] text-star/50">2026-08-26</div>
-            <h3 class="mt-2 text-star/80 text-[15px]">起点</h3>
-            <p class="mt-1.5 text-[13px] leading-relaxed text-star/60">接入其他模型指南、ccho38 手册解析。宇宙从这里开始积累质量。</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- 体积排行 -->
-      <div class="lg:col-span-6">
-        <div class="flex items-end justify-between mb-8">
-          <h2 class="text-2xl sm:text-3xl display cjk-wide">星体质量排行</h2>
-          <span class="mono text-[10px] tracking-[.18em] text-star/45">对数刻度 · GB</span>
-        </div>
-        <div id="leaderboard"></div>
-        <div class="mt-6 pt-5 border-t border-star/10 flex items-center justify-between">
-          <span class="mono text-[10px] tracking-[.16em] text-star/50">编目合计 <span data-size>11.3</span> GB · <span data-files>140,526</span> 粒子</span>
-          <span class="mono text-[10px] tracking-[.16em] text-star/40">含顶层散落交付 ≈ 12 GB</span>
-        </div>
-      </div>
-    </div>
-  </section>
+<body>
+<div class="nebula" aria-hidden="true"></div><div class="nebula b" aria-hidden="true"></div><canvas id="sky" aria-hidden="true"></canvas><div class="vignette" aria-hidden="true"></div>
+<header class="topbar wrap"><a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"></span>量子光境 <span class="mono" style="color:#8da0bc;font-size:9px">DSH</span></a><nav class="toplinks" aria-label="页面导航"><a href="#archive">作品档案</a><a href="#history">编年史</a><a class="extra" href="https://github.com/yuanyhui47-sudo/mysite" target="_blank" rel="noopener">GITHUB ↗</a></nav></header>
+<main id="top">
+<section class="hero wrap" aria-label="互动宇宙星图">
+ <div class="scene-shell" id="sceneShell">
+  <div class="hero-copy"><div class="eyebrow">PERSONAL DIGITAL UNIVERSE / 2026</div><h1>量子光境</h1><p>一个人的数字宇宙。<br>点击一座星系，进入它的作品世界。</p><div class="small">视频、程序动画、网页与工具，循着自己的轨道生长。</div></div>
+  <div class="hero-index"><strong data-total>17</strong><span class="mono">座作品星系<br><span style="color:#7488a5">星图 · 01—17</span></span></div>
+  <canvas id="universe" aria-hidden="true"></canvas><div class="galaxy-layer" id="galaxyLayer" role="group" aria-label="可点击的作品星系"></div>
+  <div class="scene-bottom"><p class="scene-note"><span class="live-dot"></span><span id="sceneReadout" aria-live="polite">点击星系即可跃迁 · 支持触摸与键盘</span></p><div class="scene-controls"><button class="quiet-btn" id="motionToggle" type="button" aria-pressed="true">动效：开启</button><span class="mono" id="pageReadout">01 / 03</span><button class="quiet-btn" id="prevPage" type="button" aria-label="上一片星域">←</button><button class="quiet-btn" id="nextPage" type="button" aria-label="下一片星域">下一片星域 →</button></div></div>
+ </div>
+</section>
+<div class="navigation wrap"><div class="filters" role="group" aria-label="星系分类"><button class="filter" type="button" data-category="all" aria-pressed="true">全部 / ALL <b>17</b></button><button class="filter" type="button" data-category="anim" aria-pressed="false">程序动画 <b>9</b></button><button class="filter" type="button" data-category="web" aria-pressed="false">网页服务 <b>3</b></button><button class="filter" type="button" data-category="tools" aria-pressed="false">工具 <b>5</b></button></div><a class="view-link" href="#archive">展开完整星表 ↓</a></div>
+<section id="archive" class="archive wrap"><div class="section-head"><div><div class="eyebrow">THE ARCHIVE / 档案展馆</div><h2><span data-total>17</span> 个独立的作品世界</h2></div><p>星图和档案使用同一套入口。<br>每个项目都能进入详情，而不是一张无法点击的卡片。</p></div><div id="projectGrid" class="project-grid"></div><p class="archive-notice">成片体积与源码档案体积分别标注；没有公开的素材不会伪装成可打开的下载链接。</p></section>
+<section class="wrap"><div class="stats glass"><div class="stat"><strong data-total>17</strong><span>作品星系</span><small>每座都可以进入</small></div><div class="stat"><strong>83.2 <span>MB</span></strong><span>world.execute(me); 成片</span><small>上传的 720p / 24fps 原文件</small></div><div class="stat"><strong>3</strong><span>独立星区</span><small>程序动画 / 网页 / 工具</small></div><div class="stat"><strong>1</strong><span>独立域名</span><small>hujyuany.online</small></div></div></section>
+<section id="history" class="history wrap"><div><div class="eyebrow" style="margin-bottom:12px">COSMIC CHRONICLE</div><h2>星际编年史</h2><div class="timeline"><div class="timeline-item"><span class="mono">2026.08</span><h3>从第一个脚本开始</h3><p>模型接入、手册提取与下载工具链。</p></div><div class="timeline-item"><span class="mono">2026.09</span><h3>工具开始汇成星区</h3><p>试卷修复、公式转换与中转站测评。</p></div><div class="timeline-item"><span class="mono">2026.10.01</span><h3>熵变 · 量子</h3><p>两部 90 秒程序动画，含原创程序合成配乐。</p></div><div class="timeline-item"><span class="mono">2026.10.02</span><h3>多余之路 · 错误中的秩序</h3><p>图论与纠错码成为电影，十一秒也被留了下来。</p></div><div class="timeline-item"><span class="mono">2026.10.03—04</span><h3>量子光境与 world.execute(me);</h3><p>网站上线；将 83.2 MB 成片放进宇宙，不再以源码库大小代表作品。</p></div></div></div><div><div class="eyebrow" style="margin-bottom:12px">ARCHIVE MASS / 区分成片与源码</div><h2>星体档案质量</h2><div id="ranking"></div><p class="archive-notice">PV 按上传成片计，其余按项目档案计。星轨长度采用对数刻度。</p></div></section>
 </main>
-
-<!-- ═══════════ 页脚 ═══════════ -->
-<footer class="layer border-t border-star/10">
-  <div class="mx-auto max-w-[1240px] px-6 sm:px-10 py-12">
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-8">
-      <div>
-        <div class="mono label text-star/50">DSH ⁄ Deep Space Observatory</div>
-        <p class="mt-4 text-[13px] leading-relaxed text-star/60 max-w-[46ch]">
-          一座单人观测台。所有数字来自工作区实测编目，不是估算 —— 每个天体都标注了成品与源码的去处。
-        </p>
-      </div>
-      <div class="flex flex-wrap gap-x-8 gap-y-3">
-        <a href="#catalog" class="link-quiet">星表</a>
-        <a href="#chronicle" class="link-quiet">编年史</a>
-        <a href="https://hujyuany.online" target="_blank" rel="noopener" class="link-quiet" data-online-hide>hujyuany.online ↗</a>
-        <button type="button" class="link-quiet" data-copy="DSH项目总览.md" data-online-hide>复制编目档路径</button>
-      </div>
-    </div>
-    <div class="mt-12 pt-6 border-t border-star/10 flex flex-col sm:flex-row gap-3 sm:items-center justify-between mono text-[10px] tracking-[.16em] text-star/40">
-      <span>Single-file HTML · Tailwind CDN · Vanilla JS</span>
-      <span>星空观测窗口 2026.08.26 → 2026.10.04</span>
-    </div>
-  </div>
-</footer>
-
-<div id="toast" class="glass mono text-[11px] tracking-[.16em] text-star/85">已复制</div>
-
+<footer><div class="wrap footer-row"><div class="eyebrow" style="color:#a2b6ce">DSH / A QUIET UNIVERSE</div><p>独立创作者 · 全栈开发者<br><span class="mono">NOT EVERY STAR NEEDS TO BE THE BRIGHTEST.</span></p><a href="#top">回到星图 ↑</a></div></footer>
+<!-- 每座星系都进入同一个无障碍项目界面：视频/离线动画/网页/档案说明。 -->
+<dialog id="projectView" aria-labelledby="detailTitle"><div class="detail-shell" id="detailContent"></div></dialog>
+<div id="warp" aria-hidden="true"></div><div id="toast" role="status"></div>
+<noscript><p class="wrap" style="padding:30px">请启用 JavaScript 后探索互动星图。项目资料不会在未加载脚本时伪装成可点击入口。</p></noscript>
 <script>
-/* ══════════════════════════════════════════════════════════════════════
-   星表数据 —— 单一事实来源。
-   体积 / 文件数 / 时间 / 交付物路径全部来自工作区实测编目，
-   卡片、质量谱、数据星盘、排行榜都由这一份数据派生，不会互相说谎。
-   ══════════════════════════════════════════════════════════════════════ */
-const CATS = {
-  anim : { name:'程序动画',  latin:'ANIM'  },
-  web  : { name:'网站与工具', latin:'WEB'   },
-  tools: { name:'零散工具',  latin:'TOOLS' }
-};
-
-const STATUS = {
-  dwarf: { label:'白矮星', note:'已交付',  cls:'dwarf' },
-  giant: { label:'红巨星', note:'生长中',  cls:'giant' },
-  dark : { label:'暗物质', note:'归档休眠', cls:'dark'  }
-};
-
-/* links: { t:标题, href:外链或相对路径, copy:要复制的本地路径 } —— href 与 copy 二选一 */
-const PROJECTS = [
-  { cat:'anim', status:'giant', size:'xl',
-    name:'world.execute(me); PV', latin:'WORLD.EXECUTE(ME); ⁄ 大肥鱼', mb:9113, files:65150, sizeLabel:'8.9 GB',
-    meta:'5086 帧 · 1080p · TUI 同人 PV',
-    desc:'左侧用 Playwright 逐帧截下 DSH 自身的 CSS 渲染，右侧是 PIL 绘制的模型可视化引擎。全片是歌曲时间的函数，也是全库唯一挂 git 远端的项目。',
-    links:[
-      { t:'跃迁 · 成品', href:'https://www.bilibili.com/video/BV1xCai6aE9g', kind:'out' },
-      { t:'核心 · 源码', href:'https://github.com/MisakaZentai/world-execute-me-dsh-pv', kind:'src' }
-    ]
-  },
-  { cat:'anim', status:'dwarf', size:'lg',
-    name:'错误中的秩序', latin:'ORDER WITHIN ERROR', mb:716, files:9193, sizeLabel:'716 MB',
-    meta:'5400 帧 · 180 秒 · 中英字幕',
-    desc:'Hamming(7,4) 偶校验码的双语数学电影。交付 12.4 MB 成片，外加 15 份核验 JSON 与可复现性验证。',
-    links:[
-      { t:'跃迁 · 成品', href:'order-within-error/out/Order-Within-Error.mp4', kind:'out' },
-      { t:'核心 · 源码', href:'错误中的秩序-源码与验证.zip', kind:'src' }
-    ]
-  },
-  { cat:'anim', status:'dark', size:'lg3',
-    name:'参考素材库', latin:'REFERENCE FOUR', mb:438, files:1716, sizeLabel:'438 MB',
-    meta:'4 组参考 · 1716 文件',
-    desc:'world-source / algebra-source / first / second 四组对照素材，为同人 PV 的镜头语言提供参照。',
-    links:[ { t:'核心 · 源码', copy:'reference-four/' } ]
-  },
-  { cat:'anim', status:'dwarf', size:'lg3',
-    name:'熵变', latin:'ENTROPY MOTION', mb:408, files:21884, sizeLabel:'408 MB',
-    meta:'2700 帧 · 90 秒 · 8 镜头',
-    desc:'Remotion + React + TS 的热力学叙事，含 90 秒原创程序合成音乐与完整分镜、动效、音乐设计文档。',
-    links:[
-      { t:'跃迁 · 成品', href:'熵变-全片配乐预览.html', kind:'out' },
-      { t:'核心 · 源码', href:'熵变-全片配乐-源码.zip', kind:'src' }
-    ]
-  },
-  { cat:'tools', status:'dark', size:'lg3',
-    name:'公式转换链', latin:'PDFJOB ⁄ OMML → LATEX', mb:287, files:13124, sizeLabel:'287 MB',
-    meta:'13,124 文件 · docx 公式管线',
-    desc:'docx 公式 → OMML → LaTeX 的转换与渲染测试链，试卷详解的幕后工坊。',
-    links:[ { t:'核心 · 源码', copy:'pdfjob/' } ]
-  },
-  { cat:'anim', status:'dwarf', size:'lg3',
-    name:'多余之路', latin:'THE PATH WE KEEP', mb:255, files:14983, sizeLabel:'255 MB',
-    meta:'120 秒 · 1920×1080 · 30fps',
-    desc:'最短路径 → 最小生成树 → 桥与连通分量 → 生成环。用图论算法走完一条 120 秒的路。',
-    links:[
-      { t:'跃迁 · 成品', href:'extra-route/out/多余之路.mp4', kind:'out' },
-      { t:'核心 · 源码', href:'多余之路-Remotion源码.zip', kind:'src' }
-    ]
-  },
-  { cat:'anim', status:'giant', size:'md',
-    name:'vibe-motion-app', latin:'REMOTION APP FRAMEWORK', mb:153, files:11244, sizeLabel:'153 MB',
-    meta:'11,244 文件 · 应用框架',
-    desc:'Remotion 应用骨架。规则只有两条：每帧独立可计算、不依赖渲染顺序；视觉改动先让人眼过一遍。',
-    links:[ { t:'核心 · 源码', copy:'vibe-motion-app/' } ]
-  },
-  { cat:'anim', status:'dwarf', size:'md',
-    name:'量子 · 概念电影版', latin:'QUANTUM ⁄ CONCEPT FILM v2', mb:74, files:383, sizeLabel:'74 MB',
-    meta:'2700 帧 · 90 秒 · 8 镜头',
-    desc:'第二部 90 秒概念片。公式画面全部移出，科学注释留在播放器之外。附 2.9 MB 单文件离线预览。',
-    links:[
-      { t:'跃迁 · 成品', href:'量子-概念电影版.html', kind:'out' },
-      { t:'核心 · 源码', href:'量子-完整源码.zip', kind:'src' }
-    ]
-  },
-  { cat:'anim', status:'dwarf', size:'md',
-    name:'未删除的十一秒', latin:'THE ELEVEN SECONDS', mb:48, files:89, sizeLabel:'48 MB',
-    meta:'32 秒 · 24fps · 中英字幕',
-    desc:'v2 修订加入 5.4× 摄影机推近、9.6 秒增益打开、双轨分离与 18 秒下雨。89 个文件，一寸不多。',
-    links:[
-      { t:'跃迁 · 成品', href:'未删除的十一秒/out/未删除的十一秒.mp4', kind:'out' },
-      { t:'核心 · 源码', href:'未删除的十一秒-源项目.zip', kind:'src' }
-    ]
-  },
-  { cat:'tools', status:'dwarf', size:'md',
-    name:'试卷修复工作台', latin:'WORK ⁄ REPAIR BENCH', mb:40, files:222, sizeLabel:'40 MB',
-    meta:'六版 fix_exam + 抽帧对比',
-    desc:'修复脚本从 fix_exam.js 迭代到第六版，配 review/ 抽帧与对比图，人工审核每一处修订。',
-    links:[ { t:'核心 · 源码', copy:'work/' } ]
-  },
-  { cat:'web', status:'dwarf', size:'md',
-    name:'引擎环境修复', latin:'DSHX ⁄ ENGINE ENV', mb:23, files:1084, sizeLabel:'23 MB',
-    meta:'1,084 文件 · 依赖解析',
-    desc:'pnpm 版本、依赖解析与重启日志。把 DSH 引擎从起不来，修到稳定跑到今天。',
-    links:[ { t:'核心 · 源码', copy:'dshx/' } ]
-  },
-  { cat:'anim', status:'dark', size:'md',
-    name:'原片参考分析', latin:'SUN REFERENCE ANALYSIS', mb:16, files:30, sizeLabel:'16 MB',
-    meta:'30 份抽帧与联系表',
-    desc:'对参考原片做的抽帧与联系表分析，附抓取脚本，用来核对镜头节奏。',
-    links:[ { t:'核心 · 源码', copy:'sun-reference-analysis/' } ]
-  },
-  { cat:'tools', status:'dark', size:'md',
-    name:'试卷抓取', latin:'DL ⁄ SCRAPER', mb:7.4, files:237, sizeLabel:'7.4 MB',
-    meta:'237 文件 · 多站抓取',
-    desc:'21cnjy / book118 / 自新网 / 物竞官网的下载与抓取工作区，含 docx 解包结果。',
-    links:[ { t:'核心 · 源码', copy:'dl/' } ]
-  },
-  { cat:'tools', status:'dwarf', size:'md',
-    name:'网站交付检查', latin:'QUANTUM LIGHT QA', mb:7.1, files:1131, sizeLabel:'7.1 MB',
-    meta:'三道检查 · 1,131 文件',
-    desc:'量子光境上线前的排版、精修与微信内置浏览器兼容三道路测。',
-    links:[ { t:'核心 · 源码', copy:'quantum-light-qa/' } ]
-  },
-  { cat:'web', status:'dwarf', size:'md',
-    name:'中转站保真榜', latin:'BAZAARLINK ⁄ FIDELITY', mb:2.0, files:19, sizeLabel:'2.0 MB',
-    meta:'19 个脚本 · 62 KB 报告',
-    desc:'抓取 + 探测 + 打分，产出保真度榜单，用来判断中转站有没有偷偷换模型。',
-    links:[
-      { t:'跃迁 · 成品', href:'bazaarlink-中转站保真榜.md', kind:'out' },
-      { t:'核心 · 源码', copy:'bzl/' }
-    ]
-  },
-  { cat:'tools', status:'dark', size:'md',
-    name:'表情包批注', latin:'PIC ⁄ ANNOTATION', mb:0.152, files:36, sizeLabel:'152 KB',
-    meta:'36 文件 · ffmpeg drawtext',
-    desc:'表情包与截图的批注素材，filter.txt 加一堆文案片段，交给 ffmpeg 批量出图。',
-    links:[ { t:'核心 · 源码', copy:'pic/' } ]
-  },
-  { cat:'web', status:'dwarf', size:'md',
-    name:'量子光境 · 个人网站', latin:'HUJYUANY.ONLINE', mb:0.078, files:1, sizeLabel:'78 KB',
-    meta:'单文件 · 线上 md5 一致',
-    desc:'一个 index.html 撑起整站。GitHub Pages + DNSPod，境外免备案线路，改站点就是覆盖这一个文件。',
-    links:[
-      { t:'跃迁 · 成品', href:'https://hujyuany.online', kind:'out' },
-      { t:'核心 · 源码', href:'https://github.com/yuanyhui47-sudo/mysite', kind:'src' }
-    ]
-  }
+'use strict';
+/* ── 公开展品清单。PV只展示用户上传的成片，附件原文件不会重新编码。 ── */
+const RELEASE_VIDEO='https://github.com/yuanyhui47-sudo/mysite/releases/download/universe-v2/world-execute-me-full_720p24.mp4';
+const localHost=['127.0.0.1','localhost'].includes(location.hostname)||location.protocol==='file:';
+const PROJECTS=[
+ {id:'pv',name:'world.execute(me);',short:'world.execute(me);',en:'THE FULL PV / 720P24',cat:'anim',status:'dwarf',mb:83.182,files:1,mass:'83.2 MB 成片',meta:'03:32 · 1280×720 · 24fps',desc:'基于 MisakaZentai 开源 PV 工程的个人非商业同人重制版。左侧是 DeepSeek Harness 风格的对话窗口，右侧是模型可视化引擎；这些画面设计来自原工程。本页展示完整 720p / 24fps 成片，不加载大型源码工程。',notes:'原 PV 工程与视觉设计：MisakaZentai。原曲：Mili《world.execute(me);》。本版本为个人非商业同人重制，不作为原创画面发布。',media:'video',src:'world-execute-me-full_720p24.mp4',remote:RELEASE_VIDEO,poster:'pv-cover.jpg',source:'https://github.com/MisakaZentai/world-execute-me-dsh-pv',colour:'gold',featured:true},
+ {id:'entropy',name:'熵变',short:'熵变',en:'ENTROPY MOTION',cat:'anim',status:'dwarf',mb:408,files:21884,mass:'408 MB 档案',meta:'90 秒 · 8 镜头 · 原创配乐',desc:'从有序到无序，热力学被写进时间与影像。Remotion + React + TypeScript 的八镜头程序动画，包含 90 秒原创程序合成音乐。',media:'iframe',src:'entropy-preview.html',colour:'violet'},
+ {id:'quantum',name:'量子 · 概念电影',short:'量子',en:'QUANTUM / CONCEPT FILM',cat:'anim',status:'dwarf',mb:74,files:383,mass:'74 MB 档案',meta:'90 秒 · 8 镜头 · 概念电影 v2',desc:'不让公式淹没画面，将科学注释放在播放器之外。量子状态、观察与不确定性，在一部 90 秒概念电影里相遇。',media:'iframe',src:'quantum-preview.html',colour:'teal'},
+ {id:'path',name:'多余之路',short:'多余之路',en:'THE PATH WE KEEP',cat:'anim',status:'dwarf',mb:255,files:14983,mass:'255 MB 档案',meta:'120 秒 · 1080p · 图论叙事',desc:'最短路径、最小生成树、桥与连通分量，最后生成一个环。用图论解释我们为什么留下一条并非最短的路。',media:'video',src:'path-we-keep.mp4',colour:'blue'},
+ {id:'order',name:'错误中的秩序',short:'错误中的秩序',en:'ORDER WITHIN ERROR',cat:'anim',status:'dwarf',mb:716,files:9193,mass:'716 MB 档案',meta:'180 秒 · Hamming(7,4) · 中英字幕',desc:'信号穿过噪声，纠错码把秩序带回来。Hamming(7,4) 偶校验码双语数学电影，附字幕与逐项交付核验。',media:'video',src:'order-within-error.mp4',colour:'violet'},
+ {id:'eleven',name:'未删除的十一秒',short:'十一秒',en:'THE ELEVEN SECONDS',cat:'anim',status:'dwarf',mb:48,files:89,mass:'48 MB 档案',meta:'32 秒 · 24fps · 中英字幕',desc:'摄影机推近、增益打开、双轨分离与一场雨。一段被留下的时间，经过 v2 修订后成为 32 秒短片。',media:'video',src:'eleven-seconds.mp4',colour:'blue'},
+ {id:'site',name:'量子光境 · 个人网站',short:'量子光境',en:'HUJYUANY.ONLINE',cat:'web',status:'dwarf',mb:.078,files:1,mass:'单文件网站',meta:'GitHub Pages · 独立域名',desc:'一个 HTML 文件承载整个数字宇宙。作品星图、档案展馆与项目详情，在同一页完成漫游。',url:'https://hujyuany.online/',source:'https://github.com/yuanyhui47-sudo/mysite',colour:'gold'},
+ {id:'vibe',name:'程序动画框架',short:'动画框架',en:'VIBE MOTION APP',cat:'anim',status:'giant',mb:153,files:11244,mass:'153 MB 档案',meta:'Remotion · 确定性逐帧计算',desc:'每一帧都能独立计算，不依赖渲染顺序；视觉改动经过人工检查。这里归档的是程序动画应用的骨架与开发环境。',notes:'该工程目前没有独立公开演示。此页展示其技术说明；没有把本地目录伪装成线上下载。',colour:'teal'},
+ {id:'reference',name:'镜头参考素材库',short:'镜头参考',en:'REFERENCE FOUR',cat:'anim',status:'dark',mb:438,files:1716,mass:'438 MB 档案',meta:'4 组参照 · 镜头语言',desc:'四组工作参考：world-source、algebra-source、first 与 second，用来校验镜头节奏、构图与程序动画的表达方式。',notes:'参考素材不在此站分发。这座星系展示工作方法，而非未经许可的素材下载。',colour:'violet'},
+ {id:'analysis',name:'原片参考分析',short:'参考分析',en:'SUN REFERENCE ANALYSIS',cat:'anim',status:'dark',mb:16,files:30,mass:'16 MB 档案',meta:'30 份抽帧与联系表',desc:'通过抽帧、联系表与抓取脚本，对照镜头节奏与画面结构。这些观测结果反过来服务于自己的镜头设计。',notes:'抽帧工作资料尚未公开；当前页提供项目说明。',colour:'blue'},
+ {id:'fidelity',name:'中转站保真榜',short:'保真测评',en:'BAZAARLINK FIDELITY',cat:'web',status:'dwarf',mb:2,files:19,mass:'2 MB 档案',meta:'抓取 · 模型探测 · 测评报告',desc:'用脚本完成抓取、探测与打分，整理中转站的模型保真度，识别可能的模型替换与响应偏差。',notes:'完整测评报告暂未公开。这里只展示项目用途和方法，不公布账号配置或私有端点。',colour:'teal'},
+ {id:'engine',name:'引擎环境修复',short:'引擎修复',en:'DSHX / ENGINE ENV',cat:'web',status:'dwarf',mb:23,files:1084,mass:'23 MB 档案',meta:'依赖解析 · pnpm · 运行环境',desc:'从依赖解析到重启日志，对引擎环境做逐步修复，让程序动画与网页制作能够稳定运行。',notes:'环境日志与本机配置不在公开网站分发。',colour:'blue'},
+ {id:'formula',name:'公式转换链',short:'公式转换',en:'PDFJOB / OMML TO LATEX',cat:'tools',status:'dark',mb:287,files:13124,mass:'287 MB 档案',meta:'DOCX → OMML → LaTeX',desc:'面向数学文档的公式转换与渲染测试链，将 DOCX 的数学表达提取成可继续处理的 LaTeX，服务于试卷与解题文档。',notes:'本地工程尚未发布下载；当前页面可以直接查看完整项目说明。',colour:'violet'},
+ {id:'repair',name:'试卷修复工作台',short:'试卷修复',en:'WORK / REPAIR BENCH',cat:'tools',status:'dwarf',mb:40,files:222,mass:'40 MB 档案',meta:'六版修复脚本 · 人工对比审核',desc:'从第一版到第六版修复脚本，配合抽帧与对比图，逐处检查排版、清晰度与修订结果。',notes:'当前以项目说明对外展示，不发布原始试卷或私有工作区文件。',colour:'gold'},
+ {id:'scraper',name:'试卷抓取工具',short:'数据抓取',en:'DL / SCRAPER',cat:'tools',status:'dark',mb:7.4,files:237,mass:'7.4 MB 档案',meta:'多站抓取 · 下载 · 文档解包',desc:'用于网页资料下载、试卷抓取与 DOCX 解包的工作区，连接获取资料和文档处理两段流程。',notes:'下载脚本仅展示用途；未公开的配置与资料不会成为无效外链。',colour:'teal'},
+ {id:'qa',name:'网站交付检查',short:'网站质检',en:'QUANTUM LIGHT QA',cat:'tools',status:'dwarf',mb:7.1,files:1131,mass:'7.1 MB 档案',meta:'排版 · 精修 · 移动端兼容',desc:'上线之前的排版、精修与移动端兼容检查，确保单文件页面在不同屏幕尺寸下仍能正确操作。',notes:'测试工程本机归档，项目说明可以公开阅读。',colour:'blue'},
+ {id:'threebody',name:'三体轨道实验',short:'三体轨道',en:'THREE BODY / ORBIT LAB',cat:'tools',status:'dwarf',mb:.0061,files:1,mass:'6.1 KB 互动实验',meta:'牛顿引力 · 三体混沌 · 速度控制',desc:'三个质量相近的天体在牛顿引力下相互绕转。保留轨迹、调整速度或换一组初始条件，亲手观察混沌怎样从简单规则中生长。',media:'iframe',src:'three-body.html',fragment:true,colour:'violet'}
 ];
-
-/* 编目号按质量重排，让 DSH-01…18 与排行榜一致（数据里的 id 只作交叉引用） */
-PROJECTS.sort((a,b) => b.mb - a.mb);
-PROJECTS.forEach((p, i) => { p.rank = i + 1; p.no = 'DSH-' + String(i+1).padStart(2,'0'); });
-
-const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const canHover     = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
-const fmt = n => n.toLocaleString('en-US');
-
-/* 线上 / 本机 自适应：
-   http(s) 打开 = 线上版 —— 指向本机工作区的成品与源码按钮对访客没有意义，
-   自动降级成「仅本机」标签，避免点开 404；
-   file:// 打开 = 本机版 —— 相对路径直接可用，方便自己在手机上翻作品。 */
-const ONLINE = /^https?:$/.test(location.protocol);
-
-/* ══════════════════════════════════════════════════════════════════════
-   1. 星空 canvas
-   —— 性能策略：星点用预渲染精灵（drawImage），不用逐帧 arc+渐变；
-      星云交给 CSS；旋转按 3 个景深分层整体旋转，每帧只有 3 次矩阵变换。
-   ══════════════════════════════════════════════════════════════════════ */
-(function sky(){
-  const cv = document.getElementById('sky');
-  const ctx = cv.getContext('2d', { alpha:true });
-  let W=0, H=0, stars=[], dust=[], sprites=[], raf=0, t=0;
-  let px=0, py=0, tx=0, ty=0;            // 鼠标视差（当前 / 目标）
-  const mobile = matchMedia('(max-width: 768px)').matches;
-
-  /* 预渲染 3 档星点精灵：核心亮、外圈柔 */
-  function makeSprites(){
-    const defs = [
-      { r:1.0, a:.85 }, { r:1.8, a:.6 }, { r:3.0, a:.38 }
-    ];
-    sprites = defs.map(d => {
-      const s = Math.ceil(d.r * 4);
-      const c = document.createElement('canvas');
-      c.width = c.height = s * 2;
-      const g = c.getContext('2d');
-      const rg = g.createRadialGradient(s, s, 0, s, s, s);
-      rg.addColorStop(0,   'rgba(255,255,255,' + d.a + ')');
-      rg.addColorStop(.35, 'rgba(226,236,255,' + (d.a*.5) + ')');
-      rg.addColorStop(1,   'rgba(160,190,255,0)');
-      g.fillStyle = rg; g.beginPath(); g.arc(s, s, s, 0, Math.PI*2); g.fill();
-      return { cv:c, size:s*2 };
-    });
-  }
-
-  function buildStars(){
-    // 手机端星点更少、景深更浅，保证 60fps
-    const area  = W * H;
-    const count = Math.round(Math.min(mobile ? 120 : 240, Math.max(70, area / (mobile ? 9000 : 6500))));
-    stars = [];
-    for (let i=0;i<count;i++){
-      const depth = [0.30, 0.62, 1][i % 3];
-      stars.push({
-        x: Math.random()*W, y: Math.random()*H,
-        depth,
-        sp:  0.008 + Math.random()*0.02,      // 闪烁速度
-        ph:  Math.random()*Math.PI*2,
-        s:   Math.random() < .12 ? 2 : (Math.random() < .45 ? 1 : 0)   // 精灵档位
-      });
-    }
-  }
-
-  function resize(){
-    const dpr = Math.min(window.devicePixelRatio || 1, mobile ? 1.5 : 2);
-    W = window.innerWidth; H = window.innerHeight;
-    cv.width = Math.floor(W*dpr); cv.height = Math.floor(H*dpr);
-    cv.style.width = W+'px'; cv.style.height = H+'px';
-    ctx.setTransform(dpr,0,0,dpr,0,0);
-    buildStars();
-  }
-
-  function frame(){
-    t += 0.016;
-    px += (tx - px) * 0.045;   // 视差缓动
-    py += (ty - py) * 0.045;
-
-    ctx.clearRect(0,0,W,H);
-    ctx.globalCompositeOperation = 'lighter';
-
-    const depths = [0.30, 0.62, 1];
-    for (let d=0; d<3; d++){
-      const depth = depths[d];
-      ctx.save();
-      // 整层极慢自转（模拟天球旋转）
-      ctx.translate(W/2 + px*depth*16, H/2 + py*depth*16);
-      ctx.rotate(t * 0.006 * depth);
-      ctx.translate(-W/2, -H/2);
-
-      for (let i=d; i<stars.length; i+=3){
-        const st = stars[i];
-        const a = 0.35 + 0.65 * Math.abs(Math.sin(t*st.sp*6 + st.ph));
-        const sp = sprites[st.s];
-        const half = sp.size/2;
-        ctx.globalAlpha = a * (0.35 + depth*0.65);
-        ctx.drawImage(sp.cv, st.x - half, st.y - half, sp.size, sp.size);
-      }
-      ctx.restore();
-    }
-
-    // 鼠标星尘：极少量、只追随最近一次移动
-    for (let i=dust.length-1; i>=0; i--){
-      const p = dust[i];
-      p.x += p.vx; p.y += p.vy; p.life -= 0.016;
-      if (p.life <= 0){ dust.splice(i,1); continue; }
-      ctx.globalAlpha = p.life * 0.5;
-      ctx.fillStyle = p.c === 'g' ? 'rgba(246,224,94,.9)' : 'rgba(79,209,197,.9)';
-      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
-    }
-
-    ctx.globalAlpha = 1;
-    ctx.globalCompositeOperation = 'source-over';
-    raf = requestAnimationFrame(frame);
-  }
-
-  let lastDust = 0;
-  window.addEventListener('pointermove', e => {
-    if (!canHover || reduceMotion) return;
-    tx = (e.clientX / W) * 2 - 1;
-    ty = (e.clientY / H) * 2 - 1;
-    const now = performance.now();
-    if (now - lastDust < 55 || dust.length > 42) return;
-    lastDust = now;
-    dust.push({
-      x:e.clientX, y:e.clientY,
-      vx:(Math.random()-.5)*.5, vy:(Math.random()-.5)*.5 - .12,
-      r:.6 + Math.random()*1.2, life:1, c: Math.random() < .22 ? 'g' : 'c'
-    });
-  }, { passive:true });
-
-  window.addEventListener('resize', resize);
-  document.addEventListener('visibilitychange', () => {   // 切后台就停，省电
-    if (document.hidden){ cancelAnimationFrame(raf); }
-    else { raf = requestAnimationFrame(frame); }
-  });
-
-  makeSprites(); resize();
-  if (reduceMotion){ frame(); cancelAnimationFrame(raf); }   // 只画一帧静态星空
-  else raf = requestAnimationFrame(frame);
-})();
-
-/* ══════════════════════════════════════════════════════════════════════
-   2. 渲染星表卡片
-   ══════════════════════════════════════════════════════════════════════ */
-const GRID_CLASS = {
-  xl : 'sm:col-span-2 lg:col-span-4 lg:row-span-2 min-h-[320px] lg:min-h-[440px]',
-  lg : 'sm:col-span-2 lg:col-span-2 lg:row-span-2 min-h-[300px] lg:min-h-[440px]',
-  lg3: 'sm:col-span-2 lg:col-span-3 min-h-[240px]',
-  md : 'sm:col-span-1 lg:col-span-2 min-h-[240px]'
-};
-
-function linkHTML(l){
-  if (ONLINE && !/^https?:/.test(l.href || '')){
-    return '<span class="local-tag" title="成品保存在本机工作区，未上传到线上">仅本机 · Local</span>';
-  }
-  const sheen = '<span class="sheen"></span>';
-  const tint  = l.kind === 'out' ? 'primary' : '';
-  if (l.href){
-    const ext = /^https?:/.test(l.href);
-    return '<a class="btn ' + tint + '" href="' + l.href + '"' + (ext ? ' target="_blank" rel="noopener"' : '') + '>' + sheen + l.t + (ext ? ' ↗' : '') + '</a>';
-  }
-  return '<button type="button" class="btn ' + tint + '" data-copy="' + l.copy + '" title="复制路径：' + l.copy + '">' + sheen + l.t + '</button>';
+PROJECTS.forEach((p,i)=>p.no=String(i+1).padStart(2,'0'));
+const LABELS={anim:'程序动画',web:'网页与服务',tools:'工具链'};
+const STATUS={dwarf:'白矮星 · 已完成',giant:'红巨星 · 持续迭代',dark:'暗物质 · 归档'};
+const el=id=>document.getElementById(id);
+let category='all',page=0,activeProject=null,flightTimer=0,opener=null;
+let motion=!matchMedia('(prefers-reduced-motion: reduce)').matches;
+let focusedId=null;
+const diagram=el('sceneShell'),sceneCanvas=el('universe'),sceneContext=sceneCanvas.getContext('2d');
+const skyCanvas=el('sky'),skyContext=skyCanvas.getContext('2d');
+let width=1,height=1,vw=1,vh=1,dpr=1,raf=0,lastFrame=-Infinity,sceneVisible=true;
+let visibleGalaxies=[],starfield=[],cursor={x:0,y:0,active:false},dust=[];
+let previousPointer={x:0,y:0,time:0};
+const colours={gold:[225,201,145],violet:[155,135,193],teal:[132,207,199],blue:[146,179,210]};
+window.__universeDiagnostics={frames:0,open:null,media:null,motion,version:'galaxy-v2'};
+/* 种子随机只在初始化使用；每帧位置和旋转都由时间与稳定输入直接计算。 */
+function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function sprite(p,index){
+ const c=document.createElement('canvas');c.width=420;c.height=260;const ctx=c.getContext('2d'),r=rng(7182+index*913),rgb=colours[p.colour];
+ ctx.translate(210,130);ctx.rotate(-.35+index*.03);ctx.scale(1,.52);
+ const g=ctx.createRadialGradient(0,0,2,0,0,170);g.addColorStop(0,`rgba(${rgb},.26)`);g.addColorStop(.22,`rgba(${rgb},.10)`);g.addColorStop(1,`rgba(${rgb},0)`);ctx.fillStyle=g;ctx.fillRect(-210,-250,420,500);
+ // 两条螺旋臂：柔和星尘，而不是粗线圈。先绘雾，再绘可辨识恒星。
+ for(let i=0;i<1800;i++){const radius=7+Math.pow(r(),.75)*165,arm=i%2*Math.PI,angle=arm+radius*.042+(r()-.5)*(.24+radius*.0025);const x=Math.cos(angle)*radius+(r()-.5)*9,y=Math.sin(angle)*radius+(r()-.5)*9;const alpha=.055+r()*.30;ctx.fillStyle=`rgba(${rgb},${alpha})`;ctx.beginPath();ctx.arc(x,y,.5+r()*1.2,0,Math.PI*2);ctx.fill();}
+ const core=ctx.createRadialGradient(0,0,0,0,0,28);core.addColorStop(0,'rgba(255,250,230,.94)');core.addColorStop(.16,'rgba(235,226,202,.52)');core.addColorStop(.5,`rgba(${rgb},.16)`);core.addColorStop(1,`rgba(${rgb},0)`);ctx.fillStyle=core;ctx.beginPath();ctx.arc(0,0,28,0,Math.PI*2);ctx.fill();return c;
 }
-
-function cardHTML(p){
-  const st = STATUS[p.status];
-  const featured = p.size === 'xl';
-  return `
-  <article class="card glass ${featured ? 'is-featured' : ''} ${GRID_CLASS[p.size]}"
-           data-cat="${p.cat}" data-no="${p.no}" data-name="${p.name}"
-           data-mass="${p.sizeLabel}" data-files="${fmt(p.files)}" tabindex="0"
-           aria-label="${p.no} ${p.name}，${st.label}，${p.sizeLabel}，${fmt(p.files)} 个文件">
-    ${featured ? '<div class="core"></div>' : ''}
-    <div class="halo"></div>
-
-    <div class="relative z-10 flex h-full flex-col p-6 sm:p-7">
-      <div class="flex items-start justify-between gap-4">
-        <div class="min-w-0">
-          <div class="mono text-[10px] tracking-[.22em] text-star/60 flex items-center gap-2.5">
-            <span class="dot ${st.cls}"></span>${p.no} · <span class="${p.status==='giant' ? 'text-gold/85' : (p.status==='dark' ? 'text-mist/90' : 'text-star/60')}">${st.label}</span>
-            <span class="text-star/40 hidden sm:inline">${st.note}</span>
-          </div>
-          <h3 class="${featured ? 'text-2xl sm:text-[2rem]' : 'text-lg sm:text-xl'} display mt-3.5 leading-snug">${p.name}</h3>
-          <div class="mono text-[9.5px] tracking-[.18em] text-star/40 mt-1.5 truncate">${p.latin}</div>
-        </div>
-        <div class="text-right shrink-0">
-          <div class="font-display text-lg sm:text-xl ${featured ? 'text-gold' : 'text-star/85'} tabular-nums">${p.sizeLabel}</div>
-          <div class="mono text-[9.5px] tracking-[.14em] text-star/50 mt-1">${fmt(p.files)} 粒子</div>
-        </div>
-      </div>
-
-      <p class="${featured ? 'text-[14px] sm:text-[15px] max-w-[46ch]' : 'text-[13px]'} mt-4 leading-[1.85] text-star/68">${p.desc}</p>
-
-      <div class="mt-auto pt-6 flex flex-wrap items-center justify-between gap-3">
-        <span class="mono text-[9.5px] tracking-[.16em] text-star/45">${p.meta}</span>
-        <div class="flex flex-wrap gap-2">${p.links.map(linkHTML).join('')}</div>
-      </div>
-    </div>
-  </article>`;
+const sprites=new Map(PROJECTS.map((p,i)=>[p.id,sprite(p,i)]));
+function galaxyState(slot,t){
+ const mobile=width<600;
+ const coords=mobile?[[.51,.43,154],[.20,.31,92],[.82,.32,96],[.20,.61,92],[.81,.60,96],[.29,.79,85],[.77,.79,80]]:[[.55,.47,254],[.24,.45,167],[.81,.40,181],[.33,.72,152],[.75,.73,163],[.13,.80,131],[.91,.83,132]];
+ const [nx,ny,size]=coords[slot];const phase=slot*1.93;
+ return {x:width*nx+(motion?Math.sin(t*.31+phase)*(mobile?4:9):0),y:height*ny+(motion?Math.cos(t*.39+phase)*(mobile?5:10):0),size,angle:motion?Math.sin(t*.065+phase)*.13:0};
 }
-
-/* 所有数量都从同一份数据派生 —— 页面里不会出现对不上的数字 */
-(function derive(){
-  const total = PROJECTS.length;
-  const files = PROJECTS.reduce((a,p) => a + p.files, 0);
-  const gb    = PROJECTS.reduce((a,p) => a + p.mb, 0) / 1024;
-  const byCat = c => c === 'all' ? total : PROJECTS.filter(p => p.cat === c).length;
-  document.querySelectorAll('[data-total]').forEach(e => e.textContent = total);
-  document.querySelectorAll('[data-files]').forEach(e => e.textContent = fmt(files));
-  document.querySelectorAll('[data-size]').forEach(e => e.textContent  = gb.toFixed(1));
-  document.querySelectorAll('[data-cats]').forEach(e => e.textContent =
-    '程序动画 ' + byCat('anim') + ' · 网站 ' + byCat('web') + ' · 工具 ' + byCat('tools'));
-  document.querySelectorAll('[data-count-cat]').forEach(e => e.textContent = byCat(e.dataset.countCat));
-  if (ONLINE){   // 首页即本站时，指向自己的链接和"复制本机路径"都是噪音
-    document.querySelectorAll('[data-online-hide]').forEach(e => e.remove());
-  }
-})();
-
-const grid = document.getElementById('grid');
-grid.innerHTML = PROJECTS.map(cardHTML).join('');
-const cards = Array.from(grid.querySelectorAll('.card'));
-
-/* ══════════════════════════════════════════════════════════════════════
-   3. 分类筛选：淡出 → 重组 → 逐个淡入
-   ══════════════════════════════════════════════════════════════════════ */
-const filterBtns = Array.from(document.querySelectorAll('.filter-btn'));
-let currentCat = 'all', swapping = false;
-
-function applyFilter(cat){
-  if (swapping || cat === currentCat) return;
-  swapping = true;
-  currentCat = cat;
-  filterBtns.forEach(b => {
-    const on = b.dataset.cat === cat;
-    b.classList.toggle('is-active', on);
-    b.setAttribute('aria-pressed', on ? 'true' : 'false');
-  });
-
-  const dur = reduceMotion ? 0 : 260;
-  grid.classList.add('swapping');
-
-  setTimeout(() => {
-    let i = 0;
-    cards.forEach(c => {
-      const hit = cat === 'all' || c.dataset.cat === cat;
-      c.classList.toggle('is-hidden', !hit);
-      if (hit){
-        // 重置出现动画，按可见顺序错峰
-        c.style.setProperty('--d', Math.min(i * 42, 640) + 'ms');
-        c.classList.add('in-view');
-        c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop');
-        i++;
-      }
-    });
-    void grid.offsetWidth;               // 强制回流，让 transition 有起点
-    grid.classList.remove('swapping');
-    swapping = false;
-  }, dur);
+function filtered(){return PROJECTS.filter(p=>category==='all'||p.cat===category);}
+function renderScene(){
+ const data=filtered();page=Math.max(0,Math.min(page,Math.ceil(data.length/7)-1));
+ const chunk=data.slice(page*7,page*7+7);el('galaxyLayer').innerHTML='';
+ visibleGalaxies=chunk.map((p,slot)=>{const b=document.createElement('button');b.type='button';b.className='galaxy-hit'+(slot===0?' featured':'');b.dataset.open=p.id;b.setAttribute('aria-label',`进入 ${p.name} 星系，查看项目详情`);b.innerHTML=`<span class="galaxy-label">${p.short}</span><span class="galaxy-sub">${p.no} / ${p.media==='video'?'FILM':p.cat.toUpperCase()}</span><span class="jump-hint">点击跃迁 ↗</span>`;b.addEventListener('pointerenter',()=>{focusedId=p.id;el('sceneReadout').textContent=`已锁定 ${p.short} · 点击进入`});b.addEventListener('pointerleave',()=>{focusedId=null;el('sceneReadout').textContent='点击星系即可跃迁 · 支持触摸与键盘'});b.addEventListener('focus',()=>{focusedId=p.id});b.addEventListener('blur',()=>{focusedId=null});el('galaxyLayer').append(b);return{p,b,slot};});
+ el('pageReadout').textContent=`${String(page+1).padStart(2,'0')} / ${String(Math.ceil(data.length/7)).padStart(2,'0')}`;el('prevPage').disabled=page===0;el('nextPage').disabled=page>=Math.ceil(data.length/7)-1;draw(performance.now());
 }
-
-filterBtns.forEach(b => b.addEventListener('click', () => applyFilter(b.dataset.cat)));
-document.getElementById('filters').addEventListener('keydown', e => {
-  // 左右方向键在导航仪里巡星
-  if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
-  const i = filterBtns.indexOf(document.activeElement);
-  if (i < 0) return;
-  e.preventDefault();
-  const n = (i + (e.key === 'ArrowRight' ? 1 : -1) + filterBtns.length) % filterBtns.length;
-  filterBtns[n].focus(); applyFilter(filterBtns[n].dataset.cat);
-});
-
-/* ══════════════════════════════════════════════════════════════════════
-   4. 滚动进入视口：陨石降落 + 数据滚动
-   ══════════════════════════════════════════════════════════════════════ */
-const io = new IntersectionObserver((ents) => {
-  ents.forEach(en => {
-    if (!en.isIntersecting) return;
-    en.target.classList.add('in-view');
-    if (en.target.hasAttribute('data-count')) countUp(en.target);
-    io.unobserve(en.target);
-  });
-}, { rootMargin:'0px 0px -8% 0px', threshold:.12 });
-
-function countUp(el){
-  const target = parseFloat(el.dataset.count);
-  if (reduceMotion){ el.textContent = fmt(target); return; }
-  const dur = 1500, t0 = performance.now();
-  (function step(now){
-    const k = Math.min(1, (now - t0) / dur);
-    const e = 1 - Math.pow(1 - k, 3);                 // easeOutCubic
-    el.textContent = fmt(target < 100 ? +(target*e).toFixed(0) : Math.round(target*e));
-    if (k < 1) requestAnimationFrame(step);
-  })(t0);
+function changePage(delta){page+=delta;el('galaxyLayer').classList.add('changing');setTimeout(()=>{renderScene();el('galaxyLayer').classList.remove('changing')},motion?180:0);}
+function renderGrid(){el('projectGrid').innerHTML=filtered().map((p,i)=>`<article class="card glass ${p.featured?'featured':''}" style="--delay:${Math.min(i,5)*.045}s"><button class="card-trigger" data-open="${p.id}" aria-label="进入 ${p.name} 星系"><span class="number mono"><i class="status ${p.status}"></i>${p.no} / ${LABELS[p.cat]} / ${STATUS[p.status]}</span><h3>${p.name}</h3><p>${p.desc}</p>${p.featured?'<img class="cover-small" src="pv-cover.jpg" alt="上传的 world.execute(me); 完整成片画面" loading="lazy" onerror="this.hidden=true">':''}<span class="card-bottom"><span>${p.mass}</span><span class="open-label">进入星系 <span class="card-arrow" style="display:inline-grid;margin-left:8px">↗</span></span></span></button></article>`).join('');}
+function selectCategory(cat){category=cat;page=0;document.querySelectorAll('.filter').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.category===cat)));renderScene();renderGrid();}
+document.querySelectorAll('.filter').forEach(b=>{const count=b.dataset.category==='all'?PROJECTS.length:PROJECTS.filter(p=>p.cat===b.dataset.category).length;b.querySelector('b').textContent=count;b.addEventListener('click',()=>selectCategory(b.dataset.category));});
+el('prevPage').addEventListener('click',()=>changePage(-1));el('nextPage').addEventListener('click',()=>changePage(1));
+// 星系按钮和卡片始终有同一个点击行为；不存在“只有悬停，没有进入”的卡片。
+document.addEventListener('click',e=>{const b=e.target.closest('[data-open]');if(b){const p=PROJECTS.find(p=>p.id===b.dataset.open);if(p)navigateProject(p.id,b);}});
+function resize(){dpr=Math.min(devicePixelRatio||1,innerWidth<650?1.35:1.7);vw=innerWidth;vh=innerHeight;const rect=diagram.getBoundingClientRect();width=rect.width;height=rect.height;for(const [c,w,h] of [[sceneCanvas,width,height],[skyCanvas,vw,vh]]){c.width=Math.round(w*dpr);c.height=Math.round(h*dpr);c.getContext('2d').setTransform(dpr,0,0,dpr,0,0)}const r=rng(6151);starfield=Array.from({length:vw<650?95:190},()=>({x:r(),y:r(),size:.5+r()*1.05,phase:r()*6.28,depth:.4+r()*.6}));draw(performance.now());}
+function draw(time){
+ const t=motion?time/1000:0;skyContext.clearRect(0,0,vw,vh);skyContext.fillStyle='#e3e6f4';for(const s of starfield){const drift=motion?Math.sin(t*.025+s.phase)*8:0;skyContext.globalAlpha=.22+(Math.sin(t*.35+s.phase)+1)*.24;skyContext.beginPath();skyContext.arc(s.x*vw+drift,s.y*vh+(motion?Math.cos(t*.02+s.phase)*6:0),s.size,0,Math.PI*2);skyContext.fill();}skyContext.globalAlpha=1;
+ if(sceneVisible){sceneContext.clearRect(0,0,width,height);for(const n of visibleGalaxies){const st=galaxyState(n.slot,t);n.state=st;const buttonWidth=n.b.offsetWidth||164,buttonHeight=n.b.offsetHeight||108;n.b.style.transform=`translate3d(${st.x-buttonWidth/2}px,${st.y-buttonHeight*.47}px,0)`;sceneContext.save();sceneContext.translate(st.x,st.y);sceneContext.rotate(st.angle);sceneContext.globalAlpha=focusedId===n.p.id?1:.82;sceneContext.drawImage(sprites.get(n.p.id),-st.size/2,-st.size*.31,st.size,st.size*.62);sceneContext.restore();}
+ if(cursor.active&&innerWidth>700){const glow=sceneContext.createRadialGradient(cursor.x,cursor.y,0,cursor.x,cursor.y,115);glow.addColorStop(0,'rgba(79,209,197,.04)');glow.addColorStop(1,'rgba(79,209,197,0)');sceneContext.fillStyle=glow;sceneContext.fillRect(cursor.x-115,cursor.y-115,230,230);}
+ for(const p of dust){const age=t-p.born;if(age<0||age>1.2)continue;sceneContext.globalAlpha=(1-age/1.2)*.48;sceneContext.fillStyle=p.gold?'#efe0a2':'#a6e4d8';sceneContext.beginPath();sceneContext.arc(p.x+p.vx*age,p.y+p.vy*age,p.r,0,Math.PI*2);sceneContext.fill();}sceneContext.globalAlpha=1;dust=dust.filter(p=>t-p.born<1.2);}
+ window.__universeDiagnostics.frames++;
 }
-
-document.querySelectorAll('.fade-up').forEach(el => io.observe(el));
-cards.forEach(c => {                       // 卡片按行错峰降落
-  io.observe(c);
-});
-document.querySelectorAll('[data-count]').forEach(el => io.observe(el));
-
-/* ══════════════════════════════════════════════════════════════════════
-   5. 质量谱：对数刻度 + 可点击跃迁
-   ══════════════════════════════════════════════════════════════════════ */
-(function massStrip(){
-  const strip = document.getElementById('massStrip');
-  const readout = document.getElementById('massReadout');
-  const logs = PROJECTS.map(p => Math.log10(Math.max(p.mb, .05)));
-  const lo = Math.min(...logs), hi = Math.max(...logs);
-  const grow = l => 1.2 + (l - lo) / (hi - lo) * 10.8;   // 归一化到 [1.2, 12]
-
-  PROJECTS.forEach((p, i) => {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'mass-seg' + (p.rank <= 3 ? ' bright' : '');
-    b.style.flex = grow(logs[i]).toFixed(2) + ' 1 0';
-    b.setAttribute('aria-label', p.no + ' ' + p.name + '，' + p.sizeLabel);
-    b.title = p.no + ' · ' + p.name + ' · ' + p.sizeLabel;
-    b.addEventListener('mouseenter', () => {
-      readout.textContent = p.no + ' · ' + p.name + ' · ' + p.sizeLabel + ' · ' + fmt(p.files) + ' 粒子';
-      readout.style.color = 'rgba(246,224,94,.9)';
-    });
-    b.addEventListener('focus', () => b.dispatchEvent(new Event('mouseenter')));
-    b.addEventListener('click', () => jumpTo(p));
-    strip.appendChild(b);
-  });
-  strip.addEventListener('mouseleave', () => {
-    readout.textContent = '悬停查看天体 · 点击跃迁';
-    readout.style.color = '';
-  });
-})();
-
-function jumpTo(p){
-  if (currentCat !== 'all' && p.cat !== currentCat) applyFilter('all');
-  const el = grid.querySelector('[data-no="' + p.no + '"]');
-  if (!el) return;
-  setTimeout(() => {
-    el.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block:'center' });
-    el.classList.add('pop'); el.classList.add('in-view');
-    el.animate(
-      [{ boxShadow:'0 0 0 0 rgba(246,224,94,0)' }, { boxShadow:'0 0 0 2px rgba(246,224,94,.85)' }, { boxShadow:'0 0 0 0 rgba(246,224,94,0)' }],
-      { duration: reduceMotion ? 1 : 2200, easing:'ease-out' }
-    );
-  }, currentCat === 'all' ? 0 : 320);
+function loop(time){if(!motion||document.hidden){raf=0;return}const interval=innerWidth<650?33:16;if(time-lastFrame>=interval){draw(time);lastFrame=time}raf=requestAnimationFrame(loop);}
+function start(){if(!raf&&motion&&!document.hidden)raf=requestAnimationFrame(loop);}
+function setMotion(on){motion=on;document.body.classList.toggle('motion-off',!on);document.body.classList.toggle('motion-on',on);el('motionToggle').setAttribute('aria-pressed',String(on));el('motionToggle').textContent=on?'动效：开启':'动效：暂停';window.__universeDiagnostics.motion=on;if(!on){cancelAnimationFrame(raf);raf=0;dust=[];draw(performance.now());}else start();}
+el('motionToggle').addEventListener('click',()=>setMotion(!motion));document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(raf);raf=0}else start()});addEventListener('resize',resize);addEventListener('pageshow',start);
+diagram.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse'||!motion)return;const r=diagram.getBoundingClientRect();cursor={x:e.clientX-r.left,y:e.clientY-r.top,active:true};if(e.timeStamp-previousPointer.time>48){dust.push({x:cursor.x,y:cursor.y,vx:(cursor.x-previousPointer.x)*-.08,vy:-6,born:performance.now()/1000,r:.6+(dust.length%3)*.35,gold:dust.length%5===0});dust=dust.slice(-35);previousPointer={x:cursor.x,y:cursor.y,time:e.timeStamp}}});diagram.addEventListener('pointerleave',()=>cursor.active=false);
+if('IntersectionObserver'in window){new IntersectionObserver(entries=>{const wasVisible=sceneVisible;sceneVisible=entries[0].isIntersecting;if(sceneVisible&&!wasVisible)draw(performance.now());},{rootMargin:'100px'}).observe(diagram);}
+/* ── 项目详情：hash 深链接、浏览器返回、Esc、焦点回到来处，视频离开即停。 ── */
+const dialog=el('projectView');
+function navigateProject(id,button){if(!PROJECTS.some(p=>p.id===id))return;if(!dialog.open)opener=button||document.activeElement;if(location.hash===`#project/${id}`)showProject(id,true);else location.hash=`project/${id}`;}
+function processHash(){const match=location.hash.match(/^#project\/([a-z-]+)$/);if(match){if(PROJECTS.some(p=>p.id===match[1]))showProject(match[1],false)}else closeView(false);}
+function showProject(id,immediate){
+ const p=PROJECTS.find(p=>p.id===id);if(!p)return;clearTimeout(flightTimer);if(dialog.open){mountDetail(p);return;}activeProject=id;window.__universeDiagnostics.open=id;const source=visibleGalaxies.find(n=>n.p.id===id),box=diagram.getBoundingClientRect();let x=innerWidth*.5,y=innerHeight*.5;if(source?.state){x=box.left+source.state.x;y=box.top+source.state.y;}el('warp').style.setProperty('--x',x/innerWidth*100+'%');el('warp').style.setProperty('--y',y/innerHeight*100+'%');diagram.style.setProperty('--origin',`${x-box.left}px ${y-box.top}px`);diagram.classList.toggle('flying',motion);el('warp').classList.toggle('flying',motion);
+ const open=()=>{mountDetail(p);if(!dialog.open)dialog.showModal();document.body.style.overflow='hidden';el('detailBack').focus({preventScroll:true});diagram.classList.remove('flying');el('warp').classList.remove('flying');};if(motion&&!immediate)flightTimer=setTimeout(open,330);else open();
 }
-
-/* ══════════════════════════════════════════════════════════════════════
-   6. 体积排行：细长星轨条
-   ══════════════════════════════════════════════════════════════════════ */
-(function leaderboard(){
-  const box = document.getElementById('leaderboard');
-  const lo = Math.log10(PROJECTS[PROJECTS.length-1].mb);
-  const hi = Math.log10(PROJECTS[0].mb);
-  box.innerHTML = PROJECTS.map(p => {
-    const w = 6 + (Math.log10(p.mb) - lo) / (hi - lo) * 94;    // 6%–100%
-    return `
-    <div class="rail-row fade-up" data-no="${p.no}">
-      <span class="mono text-[10px] text-star/50 tabular-nums">${String(p.rank).padStart(2,'0')}</span>
-      <div class="flex items-center gap-3">
-        <span class="text-[13px] text-star/75 truncate flex-1 min-w-0">${p.name}</span>
-        <div class="rail w-[38%] sm:w-[42%] shrink-0" style="--w:${w.toFixed(1)}%"><i></i><b></b></div>
-        <span class="mono text-[10px] text-star/60 tabular-nums w-[62px] text-right shrink-0">${p.sizeLabel}</span>
-      </div>
-    </div>`;
-  }).join('');
-  box.querySelectorAll('.rail-row').forEach((r, i) => {
-    r.style.setProperty('--d', Math.min(i*40, 400) + 'ms');
-    io.observe(r);
-  });
-})();
-
-const SCAN_TEXT = 'SCANNING · 星表 ' + PROJECTS.length + ' 项';
-
-/* ══════════════════════════════════════════════════════════════════════
-   7. 导星准星（签名元素）：只在桌面 + 星表区内工作
-   ══════════════════════════════════════════════════════════════════════ */
-(function reticle(){
-  const box = document.getElementById('catalog');
-  const ret   = document.getElementById('reticle');
-  const ring  = ret.querySelector('.ring');
-  const vLine = ret.querySelector('.v');
-  const hLine = ret.querySelector('.h');
-  const panel = document.getElementById('readout');
-  const text  = document.getElementById('readoutText');
-  if (!canHover || !panel) { if (panel) panel.style.display = 'none'; return; }
-  text.textContent = SCAN_TEXT;   // 开机读数：星表项数由数据派生
-
-  let x = 0, y = 0, cx = 0, cy = 0, active = false, running = false;
-
-  function loop(){
-    cx += (x - cx) * 0.18; cy += (y - cy) * 0.18;      // 准星略有迟滞，更像光学导星镜
-    ring.style.left = cx + 'px'; ring.style.top  = cy + 'px';
-    vLine.style.left = cx + 'px'; hLine.style.top = cy + 'px';
-    running = requestAnimationFrame(loop);
-  }
-
-  box.addEventListener('pointerenter', () => { active = true; ret.classList.add('on'); });
-  box.addEventListener('pointerleave', () => {
-    active = false; ret.classList.remove('on','lock'); panel.classList.remove('lock');
-    text.textContent = SCAN_TEXT;
-  });
-
-  box.addEventListener('pointermove', e => {
-    if (!active) return;
-    const r = box.getBoundingClientRect();
-    x = e.clientX - r.left; y = e.clientY - r.top;
-    if (!running) running = requestAnimationFrame(loop);
-  }, { passive:true });
-
-  // 锁定天体：准星收拢、读数板换成该天体的编目数据
-  cards.forEach(c => {
-    const lock = () => {
-      ret.classList.add('lock'); panel.classList.add('lock');
-      text.textContent = 'LOCKED · ' + c.dataset.no + ' ' + c.dataset.name + ' · ' + c.dataset.mass + ' · ' + c.dataset.files + ' 粒子';
-    };
-    const unlock = () => {
-      ret.classList.remove('lock'); panel.classList.remove('lock');
-      text.textContent = SCAN_TEXT;
-    };
-    c.addEventListener('mouseenter', lock);
-    c.addEventListener('mouseleave', unlock);
-    c.addEventListener('focusin', lock);
-    c.addEventListener('focusout', unlock);
-  });
-})();
-
-/* ══════════════════════════════════════════════════════════════════════
-   8. 进度星轨 + 复制路径
-   ══════════════════════════════════════════════════════════════════════ */
-(function progress(){
-  const bar = document.getElementById('progress');
-  let queued = false;
-  const upd = () => {
-    const h = document.documentElement.scrollHeight - window.innerHeight;
-    bar.style.transform = 'scaleX(' + (h > 0 ? Math.min(1, window.scrollY / h) : 0) + ')';
-    queued = false;
-  };
-  window.addEventListener('scroll', () => { if (!queued){ queued = true; requestAnimationFrame(upd); } }, { passive:true });
-  upd();
-})();
-
-const toast = document.getElementById('toast');
-let toastTimer = 0;
-function showToast(msg){
-  toast.textContent = msg;
-  toast.classList.add('on');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove('on'), 1800);
+function stopMedia(){const v=dialog.querySelector('video');if(v){v.pause();v.removeAttribute('src');v.load();}const f=dialog.querySelector('iframe');if(f)f.src='about:blank';window.__universeDiagnostics.media=null;}
+function mountDetail(p){stopMedia();activeProject=p.id;window.__universeDiagnostics.open=p.id;const i=PROJECTS.indexOf(p);
+ const media=p.media?`<div class="media-box" id="mediaBox"><div class="media-placeholder">${p.poster?`<img src="${p.poster}" alt="成片预览画面" onerror="this.hidden=true">`:''}<span class="mono" style="color:#c7c4d8">${p.media==='video'?'FILM / 按需加载':'INTERACTIVE FILM / 单文件动画'}</span><button class="play" id="startMedia" type="button">${p.media==='video'?'▶ 播放成片':'▶ 进入动画预览'}</button><span style="color:#aebdcd;font-size:11px">${p.meta}</span></div></div><p class="media-status" id="mediaStatus" role="status">${p.id==='pv'?'原始交付成片；未重新编码。':'点击后才加载，不在首页同时下载全部作品。'}</p>`:'';
+ el('detailContent').innerHTML=`<div class="detail-top"><button class="back" id="detailBack" type="button">← 返回宇宙星图</button><span class="mono muted">GALAXY ${p.no} / ${String(PROJECTS.length).padStart(2,'0')}</span></div><div class="eyebrow">${LABELS[p.cat]} / ${STATUS[p.status]}</div><h2 class="detail-title" id="detailTitle">${p.name}</h2><div class="detail-latin mono">${p.en}</div><p class="detail-desc">${p.desc}</p><div class="detail-info"><span>${p.mass}</span><span>${p.meta}</span><span>${p.id==='pv'?'1 份原始成片':p.files.toLocaleString('en-US')+' 个档案文件'}</span></div>${media}${p.notes?`<div class="notice"><strong>当前公开内容</strong>${p.notes}</div>`:''}<div class="detail-actions">${p.media?'<button class="action" type="button" id="playAgain">'+(p.media==='video'?'播放 / 继续观看':'打开动画预览')+'</button>':''}${p.url?`<a class="action" href="${p.url}" target="_blank" rel="noopener">打开网站 ↗</a>`:''}${p.source?`<a class="action secondary" href="${p.source}" target="_blank" rel="noopener">查看源码 ↗</a>`:''}<a class="action secondary" href="#archive" id="backArchive">回到全部作品</a></div><div class="project-nav"><button id="prevProject" type="button" ${i===0?'disabled':''}>← ${i>0?PROJECTS[i-1].short:'第一座星系'}</button><button id="nextProject" type="button" ${i===PROJECTS.length-1?'disabled':''}>${i<PROJECTS.length-1?PROJECTS[i+1].short:'最后一座星系'} →</button></div>`;
+ el('detailBack').onclick=()=>closeView(true);el('backArchive').onclick=()=>closeView(false);if(i>0)el('prevProject').onclick=()=>navigateProject(PROJECTS[i-1].id);if(i<PROJECTS.length-1)el('nextProject').onclick=()=>navigateProject(PROJECTS[i+1].id);if(p.media){el('startMedia').onclick=()=>startMedia(p);el('playAgain').onclick=()=>startMedia(p);}dialog.scrollTop=0;if(dialog.open)el('detailBack').focus({preventScroll:true});
 }
-
-document.addEventListener('click', async (e) => {
-  const btn = e.target.closest('[data-copy]');
-  if (!btn) return;
-  const path = btn.dataset.copy;
-  try {
-    await navigator.clipboard.writeText(path);
-    showToast('已复制路径 · ' + path);
-  } catch (err) {
-    // 剪贴板被拒时退回到"手动选中"，至少让人能复制
-    showToast('请手动复制：' + path);
-  }
-});
+function startMedia(p){
+ const box=el('mediaBox'),status=el('mediaStatus');if(box.querySelector('video')){box.querySelector('video').play().catch(()=>status.textContent='请点播放器中的播放按钮继续。');return;}if(box.querySelector('iframe')){box.querySelector('iframe').focus();return;}
+ const src=p.id==='pv'?(localHost?p.src:p.remote):p.src;status.textContent='正在载入作品…';
+ if(p.media==='video'){const v=document.createElement('video');v.controls=true;v.playsInline=true;v.preload='metadata';if(p.poster)v.poster=p.poster;v.src=src;box.replaceChildren(v);v.addEventListener('loadedmetadata',()=>{status.textContent=`已载入 · ${Math.round(v.duration)} 秒 · 可拖动进度条、调节音量或全屏`;window.__universeDiagnostics.media={id:p.id,duration:v.duration,width:v.videoWidth};});v.addEventListener('playing',()=>{status.textContent='正在播放 · 离开星系时自动暂停';window.__universeDiagnostics.media={id:p.id,playing:true,duration:v.duration};});v.addEventListener('error',()=>{status.textContent='这个展示文件尚未成功发布或当前网络无法读取；项目详情仍可查看。';const a=document.createElement('a');a.className='action secondary';a.href=src;a.textContent='尝试直接打开成片 ↗';a.target='_blank';a.rel='noopener';status.append(' ',a);});v.play().catch(error=>{if(v.error)return;if(error.name==='NotAllowedError')status.textContent='请点播放器中的播放按钮开始观看。';else if(error.name!=='AbortError')status.textContent='正在等待作品载入，请稍候或尝试直接打开成片。';});
+ }else{const f=document.createElement('iframe');f.title=p.name+' 动画播放器';f.setAttribute('sandbox','allow-scripts allow-presentation allow-downloads');f.setAttribute('allow','autoplay; fullscreen');box.replaceChildren(f);if(p.fragment){fetch(src).then(r=>{if(!r.ok)throw Error('资源未发布');return r.text()}).then(text=>{if(!f.isConnected)return;f.srcdoc='<!doctype html><html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>:root{--foreground:#e5edf5;--background:#0b0f19;--border:#425066;--accent:#203337;--muted-foreground:#a3b5c8;--primary:#4fd1c5;--ring:#4fd1c5;--viz-series-1:#4fd1c5;--viz-series-2:#f6e05e;--viz-series-3:#9e8ec6}body{margin:0;padding:14px;background:var(--background);font:12px/1.5 system-ui;color:var(--foreground)}</style>'+text+'</html>';}).catch(()=>{if(status.isConnected)status.textContent='互动实验文件未能加载，请稍后再试。';});}else f.src=src;f.addEventListener('load',()=>{if(!p.fragment||f.srcdoc)status.textContent='互动播放器已打开，可以直接操作其中的控件。';});}
+}
+function closeView(updateHash){clearTimeout(flightTimer);diagram.classList.remove('flying');el('warp').classList.remove('flying');if(dialog.open){stopMedia();dialog.close();}document.body.style.overflow='';activeProject=null;window.__universeDiagnostics.open=null;if(updateHash&&location.hash.startsWith('#project/')){history.replaceState(null,'',location.pathname+location.search+'#top');}if(opener?.isConnected)opener.focus({preventScroll:true});}
+dialog.addEventListener('cancel',e=>{e.preventDefault();closeView(true)});dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)closeView(true);}});addEventListener('hashchange',processHash);
+// 防止从链接直接进入未初始化的项目；先渲染星图，再恢复 hash 目的地。
+document.querySelectorAll('[data-total]').forEach(n=>n.textContent=PROJECTS.length);
+el('ranking').innerHTML=[...PROJECTS].sort((a,b)=>b.mb-a.mb).slice(0,7).map(p=>`<div class="rank"><span class="rank-name">${p.short}</span><span class="rail" style="--size:${10+Math.log1p(p.mb)/Math.log1p(716)*90}%"><i></i></span><span class="mono">${p.id==='pv'?'83.2 MB':p.mb+' MB'}</span></div>`).join('');
+renderGrid();resize();renderScene();setMotion(motion);processHash();
 </script>
 </body>
 </html>
